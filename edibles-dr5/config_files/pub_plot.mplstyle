@@ -1,0 +1,41 @@
+#### matplotlibrc format
+
+#### matplotlib plot style for publications
+
+#### Font
+font.family : Nimbus Roman No9 L
+font.size : 18
+
+#### LaTeX
+mathtext.default  : regular
+
+#### Axes
+axes.linewidth : 1.5
+#### disable offset in axes label
+axes.formatter.useoffset : False
+
+#### Ticks
+xtick.direction     : in
+xtick.top           : True
+xtick.major.width   : 1.5
+xtick.major.size    : 10
+xtick.minor.visible : True
+xtick.minor.width   : 1.5
+xtick.minor.size    : 7
+
+ytick.direction     : in
+ytick.right         : True
+ytick.major.width   : 1.5
+ytick.major.size    : 10
+ytick.minor.visible : True
+ytick.minor.width   : 1.5
+ytick.minor.size    : 7
+
+#### Lines
+lines.linewidth : 1.5
+
+#### Errorbars
+errorbar.capsize : 3
+
+#### DPI
+savefig.dpi : 300
