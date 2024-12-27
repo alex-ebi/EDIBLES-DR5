@@ -21,14 +21,14 @@ git config --global user.email "FirstName.LastName@student.uibk.ac.at"
 ### After that:
 
 ```console
-git clone https://github.com/alex-ebi/astro_scripts_uibk.git
-python3 -m pip install -e ./astro_scripts_uibk
+git clone https://github.com/alex-ebi/EDIBLES-DR5.git
+python3 -m pip install -e ./EDIBLES-DR5
 ```
 
 ### Build Documentation:
 
 ```console
-cd astro_scripts_uibk
+cd EDIBLES-DR5
 python3 -m pip install --upgrade -r requirements-dev.txt
 make -C docs html
 firefox docs/build/html/index.html 
@@ -45,12 +45,11 @@ For this example to run properly, it is important to install the repository with
 ## Publications
 
 If you use this code for a publication, please cite our
-paper [The EDIBLES Survey. VIII. Band profile alignment of diffuse interstellar bands](https://doi.org/10.1051/0004-6361/202348871).
+paper TBD.
 
 ## Bugs
 
 I prepared the DIB alignment algorithm to be reusable. But if you find any bug, please create an issue!
-Especially in the [alignment_full_example](examples/alignment_full_example.py).
 
 ## Development
 
