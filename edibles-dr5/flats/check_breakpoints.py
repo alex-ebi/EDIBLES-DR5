@@ -1,3 +1,8 @@
+"""
+Analysing quality control parameters of fmtchk frames of EDIBLES data from 2014.01.01 to 2019.12.31.
+Used to find time frames for flat coaddition.
+Data files are for different chips.
+"""
 import paths
 import numpy as np
 import matplotlib.pyplot as plt
