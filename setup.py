@@ -50,7 +50,7 @@ setup(
     },
     include_package_data=True,
     package_data={
-        'edibles-dr5': [
+        'edibles_dr5': [
             # When adding files here, remember to update MANIFEST.in as well,
             # or else they will not be included in the distribution on PyPI!
             # 'test_data/*',

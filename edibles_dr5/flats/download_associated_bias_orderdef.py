@@ -5,7 +5,7 @@ See UVES manual, Figure 5.10.
 """
 from pathlib import Path
 from astropy.io import fits
-from edibles_DR5.workflow import edr5_functions
+from edibles_dr5 import edr5_functions, paths
 import urllib
 import os
 
