@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.time import Time
 
-data_dir = files('edibles_dr5') / 'qc_uves/fmtchk'
+data_dir = files('edibles_dr5') / 'qc/fmtchk'
 
 breakpoints=[56667, 57119, 57360, 57448, 57777, 58140, 58455]
 breakpoints=[56667, 57119, 57448, 57777, 58140, 58455]

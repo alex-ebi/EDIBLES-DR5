@@ -8,8 +8,8 @@ from astropy.io import fits
 from pprint import pprint
 import numpy as np
 from matplotlib import pyplot as plt
-import paths
-from edibles_dr5.paths import edr5_dir
+from edibles_dr5 import paths
+from importlib.resources import files
 
 
 def wave_from_map(wave_map):
@@ -57,7 +57,7 @@ def wave_from_map(wave_map):
         extr_cols = np.array(extr_cols).T
     except ValueError as e:
         plt.imshow(wave_map)
-        plt.savefig(paths.diss_dibs / 'edibles_reduction/error_log/wavemap_error.png')
+        plt.savefig(files('edibles_dr5') / 'error_log/wavemap_error.png')
         plt.close()
         raise e
 
@@ -79,12 +79,12 @@ def parse_fxb_name(wave_map_file, xfb_fxb_string='fxb'):
 
 def main():
     xfb_fxb_string = 'xfb'
-    super_bias_blue = edr5_dir / 'superbias/superbias_blue.fits'
-    super_bias_redl = edr5_dir / 'superbias/superbias_redl.fits'
-    super_bias_redu = edr5_dir / 'superbias/superbias_redu.fits'
-    edps_object_dir = edr5_dir / 'EDPS/UVES/object'
-    output_dir = edr5_dir / f'extracted_added_{xfb_fxb_string}'
-    output_dir_online = paths.diss_dibs / f'edibles_reduction/extracted_added_{xfb_fxb_string}'
+    super_bias_blue = paths.edr5_dir / 'superbias/superbias_blue.fits'
+    super_bias_redl = paths.edr5_dir / 'superbias/superbias_redl.fits'
+    super_bias_redu = paths.edr5_dir / 'superbias/superbias_redu.fits'
+    edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
+    output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
+    output_dir_online = paths.extracted_added_online
 
     spec_list = []
     file_set = set()
@@ -131,19 +131,16 @@ def main():
             raise ValueError(f'Wrong setting suffix.')
         sof_file = sub_dir / 'input.sof'
 
-        # if wave_setting == 564.0:
-        #     continue
-
         if setting == 'blue':
-            super_flat_file_l = edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}.fits'
-            super_flat_bkg_file_l = edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}.fits'
+            super_flat_file_l = paths.edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}.fits'
+            super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}.fits'
             super_flat_file_u = super_flat_file_l
             super_flat_bkg_file_u = super_flat_bkg_file_l
         elif setting == 'red':
-            super_flat_file_l = edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}l.fits'
-            super_flat_bkg_file_l = edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}l.fits'
-            super_flat_file_u = edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}u.fits'
-            super_flat_bkg_file_u = edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}u.fits'
+            super_flat_file_l = paths.edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}l.fits'
+            super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}l.fits'
+            super_flat_file_u = paths.edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}u.fits'
+            super_flat_bkg_file_u = paths.edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}u.fits'
         else:
             raise ValueError('Wrong wavelength setting!')
         with open(sof_file, 'r') as f:
@@ -282,8 +279,11 @@ def main():
         output_dir.mkdir(parents=True, exist_ok=True)
         hdul.writeto(output_dir / file_name, overwrite=True)
 
-        output_dir_online.mkdir(parents=True, exist_ok=True)
-        hdul.writeto(output_dir_online / file_name, overwrite=True)
+        if output_dir_online is not None:
+            output_dir_online.mkdir(parents=True, exist_ok=True)
+            # Make file name which is valid for windows
+            file_name_online = file_name.replace(':', '_')
+            hdul.writeto(output_dir_online / file_name_online, overwrite=True)
 
 
 if __name__ == '__main__':
