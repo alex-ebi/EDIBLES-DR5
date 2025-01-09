@@ -2,3 +2,5 @@
 astropy
 numpy
 matplotlib
+nbformat
+nbconvert
