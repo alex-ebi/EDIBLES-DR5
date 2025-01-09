@@ -85,4 +85,4 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 
-edibles_dr5/paths_bac.py
+edibles_dr5/paths.py
