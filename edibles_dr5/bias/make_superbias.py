@@ -1,10 +1,9 @@
 import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
-import astro_scripts_uibk as asu
 from pathlib import Path
 from pprint import pprint
-from edibles_DR5.workflow.edr5_functions import edr5_dir
+from edibles_dr5.paths import edr5_dir
 
 
 def save_fits_image(file, header, data):
