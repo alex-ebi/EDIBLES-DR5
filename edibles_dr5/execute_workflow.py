@@ -10,3 +10,4 @@ with open(notebook_filename) as f:
 
 ep = ExecutePreprocessor()
 
+ep.preprocess(nb, {'metadata': {'path': 'notebooks/'}})
