@@ -77,11 +77,80 @@ def parse_fxb_name(wave_map_file, xfb_fxb_string='fxb'):
     return fxb_file
 
 
-def main():
-    xfb_fxb_string = 'xfb'
+def modify_sof(sof_file, wm_file, fxb_file):
     super_bias_blue = paths.edr5_dir / 'superbias/superbias_blue.fits'
     super_bias_redl = paths.edr5_dir / 'superbias/superbias_redl.fits'
     super_bias_redu = paths.edr5_dir / 'superbias/superbias_redu.fits'
+
+    with fits.open(wm_file) as f:
+        hdr = f[0].header
+
+    try:
+        wave_setting = hdr['ESO INS GRAT1 WLEN']
+    except KeyError:
+        wave_setting = hdr['ESO INS GRAT2 WLEN']
+
+    if 'blue' in fxb_file.name:
+        setting = 'blue'
+    elif 'redl' in fxb_file.name:
+        setting = 'red'
+    elif 'redu' in fxb_file.name:
+        setting = 'red'
+    else:
+        raise ValueError(f'Wrong setting suffix.')
+
+    if setting == 'blue':
+        super_flat_file_l = paths.edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}.fits'
+        super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}.fits'
+        super_flat_file_u = super_flat_file_l
+        super_flat_bkg_file_u = super_flat_bkg_file_l
+    elif setting == 'red':
+        super_flat_file_l = paths.edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}l.fits'
+        super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}l.fits'
+        super_flat_file_u = paths.edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}u.fits'
+        super_flat_bkg_file_u = paths.edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}u.fits'
+    else:
+        raise ValueError('Wrong wavelength setting!')
+    with open(sof_file, 'r') as f:
+        lines = f.readlines()
+
+    for i, line in enumerate(lines):
+        if 'MASTER_FLAT_BLUE' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_flat_file_l} {line_end}'
+        elif 'BKG_FLAT_' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_flat_bkg_file_l} {line_end}'
+        if 'MASTER_FLAT_REDL' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_flat_file_l} {line_end}'
+        elif 'BKG_FLAT_REDL' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_flat_bkg_file_l} {line_end}'
+        elif 'MASTER_FLAT_REDU' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_flat_file_u} {line_end}'
+        elif 'BKG_FLAT_REDU' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_flat_bkg_file_u} {line_end}'
+        elif 'MASTER_BIAS_BLUE' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_bias_blue} {line_end}'
+        elif 'MASTER_BIAS_REDL' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_bias_redl} {line_end}'
+        elif 'MASTER_BIAS_REDU' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_bias_redu} {line_end}'
+
+    new_sof_file = str(sof_file).replace('input.sof', 'input_edibles.sof')
+    with open(new_sof_file, 'w') as f:
+        f.writelines(lines)
+
+
+
+def main():
+    xfb_fxb_string = 'xfb'
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
     output_dir_online = paths.extracted_added_online
@@ -113,91 +182,29 @@ def main():
         fxb_file = sub_dir / parse_fxb_name(new_wave_maps[0], xfb_fxb_string=xfb_fxb_string)
 
         # Modify inpuf.sof file
-        with fits.open(wm_file) as f:
-            hdr = f[0].header
-
-        try:
-            wave_setting = hdr['ESO INS GRAT1 WLEN']
-        except KeyError:
-            wave_setting = hdr['ESO INS GRAT2 WLEN']
-
-        if 'blue' in fxb_file.name:
-            setting = 'blue'
-        elif 'redl' in fxb_file.name:
-            setting = 'red'
-        elif 'redu' in fxb_file.name:
-            setting = 'red'
-        else:
-            raise ValueError(f'Wrong setting suffix.')
         sof_file = sub_dir / 'input.sof'
-
-        if setting == 'blue':
-            super_flat_file_l = paths.edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}.fits'
-            super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}.fits'
-            super_flat_file_u = super_flat_file_l
-            super_flat_bkg_file_u = super_flat_bkg_file_l
-        elif setting == 'red':
-            super_flat_file_l = paths.edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}l.fits'
-            super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}l.fits'
-            super_flat_file_u = paths.edr5_dir / 'superflats' / f'superflat_{wave_setting:.0f}nm_{setting}u.fits'
-            super_flat_bkg_file_u = paths.edr5_dir / 'superflats' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}u.fits'
-        else:
-            raise ValueError('Wrong wavelength setting!')
-        with open(sof_file, 'r') as f:
-            lines = f.readlines()
-
-        for i, line in enumerate(lines):
-            if 'MASTER_FLAT_BLUE' in line:
-                line_end = line.split(' ')[-1]
-                lines[i] = f'{super_flat_file_l} {line_end}'
-            elif 'BKG_FLAT_' in line:
-                line_end = line.split(' ')[-1]
-                lines[i] = f'{super_flat_bkg_file_l} {line_end}'
-            if 'MASTER_FLAT_REDL' in line:
-                line_end = line.split(' ')[-1]
-                lines[i] = f'{super_flat_file_l} {line_end}'
-            elif 'BKG_FLAT_REDL' in line:
-                line_end = line.split(' ')[-1]
-                lines[i] = f'{super_flat_bkg_file_l} {line_end}'
-            elif 'MASTER_FLAT_REDU' in line:
-                line_end = line.split(' ')[-1]
-                lines[i] = f'{super_flat_file_u} {line_end}'
-            elif 'BKG_FLAT_REDU' in line:
-                line_end = line.split(' ')[-1]
-                lines[i] = f'{super_flat_bkg_file_u} {line_end}'
-            elif 'MASTER_BIAS_BLUE' in line:
-                line_end = line.split(' ')[-1]
-                lines[i] = f'{super_bias_blue} {line_end}'
-            elif 'MASTER_BIAS_REDL' in line:
-                line_end = line.split(' ')[-1]
-                lines[i] = f'{super_bias_redl} {line_end}'
-            elif 'MASTER_BIAS_REDU' in line:
-                line_end = line.split(' ')[-1]
-                lines[i] = f'{super_bias_redu} {line_end}'
-
-        new_sof_file = str(sof_file).replace('input.sof', 'input_edibles.sof')
-        with open(new_sof_file, 'w') as f:
-            f.writelines(lines)
-
+        modify_sof(sof_file, wm_file, fxb_file)
+ 
         if xfb_fxb_string == 'xfb':
-            os.system('/usr/bin/nice /home/alex/programs/esoreflex/install/bin/esorex '
+            os.system(f'/usr/bin/nice {paths.esorex_path} '
                       '--suppress-prefix=true '
-                      '--recipe-dir=/home/alex/programs/esoreflex/install/lib/esopipes-plugins/uves-6.4.6 '
+                      f'--recipe-dir={paths.recipe_dir} '
                       f'--output-dir={sub_dir} '
                       f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
                       f'--reduce.merge_delt1=14 --reduce.merge_delt2=4 '
                       f'{sub_dir / "input_edibles.sof"}')
 
         elif xfb_fxb_string == 'fxb':
-            os.system('/usr/bin/nice /home/alex/programs/esoreflex/install/bin/esorex '
+            os.system(f'/usr/bin/nice {paths.esorex_path} '
                       '--suppress-prefix=true '
-                      '--recipe-dir=/home/alex/programs/esoreflex/install/lib/esopipes-plugins/uves-6.4.6 '
+                      f'--recipe-dir={paths.recipe_dir} '
                       f'--output-dir={sub_dir} '
                       f'uves_obs_scired --debug=true --reduce.tiltcorr=true '
                       f'{sub_dir / "input_edibles.sof"}')
         else:
             raise ValueError('Wrong xfb string!')
 
+        # Extract reductions which were made with super flats
         for new_wm_file in new_wave_maps:
             fxb_file = sub_dir / parse_fxb_name(new_wm_file, xfb_fxb_string=xfb_fxb_string)
             fxb_err_file = sub_dir / ('err' + parse_fxb_name(new_wm_file, xfb_fxb_string=xfb_fxb_string))
@@ -237,8 +244,6 @@ def main():
                 spec_list.append([file_name, spec, fxb_hdr])
                 file_set.add(file_name)
 
-            # obs_out_dir = output_dir / star_name / obs_time / sub_dir.name
-    # print(spec_list)
     # Add spectra with same star name, setting, observation time and order
     for file_name in file_set:
         print(file_name)
