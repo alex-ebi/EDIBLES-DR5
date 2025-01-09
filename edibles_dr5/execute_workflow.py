@@ -8,6 +8,6 @@ with open(notebook_filename) as f:
     nb = nbformat.read(f, as_version=4)
 
 
-ep = ExecutePreprocessor()
+ep = ExecutePreprocessor(kernel_name='python')
 
 ep.preprocess(nb, {'metadata': {'path': 'notebooks/'}})
