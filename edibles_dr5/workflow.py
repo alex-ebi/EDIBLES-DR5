@@ -64,7 +64,7 @@ os.chdir(flat_dir)
 #                 'downloadScript_860nm.sh']
 script_names = ['downloadScript_564nm.sh']
 for script in script_names:
-    os.system(f'{download_script_dir / script}')
+    os.system(f'source {download_script_dir / script}')
 # Uncompress files
 os.system('uncompress *.Z')
 
@@ -79,9 +79,9 @@ os.system('uncompress *.Z')
 # In[ ]:
 
 
-from edibles_dr5.flats import download_associated_bias
+from edibles_dr5.flats import download_associated_bias_orderdef
 
-download_associated_bias.main(flat_dir)
+download_associated_bias_orderdef.main(flat_dir)
 
 
 # ## Make master biases with EDPS
