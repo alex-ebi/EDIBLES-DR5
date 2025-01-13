@@ -1,6 +1,6 @@
 """
 Downloading associated bias frames of flat fields.
-Also downloading orderdef files, because it is needed for the optimal flat reduction.
+Also downloading orderdef and fmtchk files, because they are needed for the optimal flat reduction.
 See UVES manual, Figure 5.10.
 """
 from pathlib import Path
@@ -71,7 +71,7 @@ def main(flat_dir):
                         urllib.request.urlretrieve(download_url, filename=flat_dir / (bias_archive_name + '.fits.Z'))
                         print(f'File {bias_archive_name}.fits downloaded')
                         os.system(f'uncompress {flat_dir / (bias_archive_name + ".fits.Z")}')
-                if line.startswith('UVES_DIC') and '_ORDDEF' in line:
+                if line.startswith('UVES_DIC') and '_ORDDEF' in line and not binning:  # Orderdef
                     order_def_wave = float(line.split()[4])
                     order_def_filter = line.split()[5]
                     if (wave == order_def_wave) and (my_filter_name == order_def_filter):
@@ -85,7 +85,21 @@ def main(flat_dir):
                                                        filename=flat_dir / (orderdef_archive_name + '.fits.Z'))
                             print(f'File {orderdef_archive_name}.fits downloaded')
                             os.system(f'uncompress {flat_dir / (orderdef_archive_name + ".fits.Z")}')
+                if line.startswith('UVES_DIC') and '_FMTCHK' in line and not binning:  # FMTCHK
+                    fmtchk_wave = float(line.split()[4])
+                    fmtchk_filter = line.split()[5]
+                    if (wave == fmtchk_wave) and (my_filter_name == fmtchk_filter):
+                        fmtchk_archive_name = line.split('\t')[1]
+                        print(fmtchk_archive_name)
+                        if not (flat_dir / (fmtchk_archive_name + '.fits')).is_file():
+                            dp_id = fmtchk_archive_name.replace('.fits', '')
+                            download_url = f'http://archive.eso.org/datalink/links?ID=ivo://eso.org/ID?{dp_id}&eso_download=file'
+                            print(f'Retrieving file {fmtchk_archive_name}.fits')
+                            urllib.request.urlretrieve(download_url,
+                                                       filename=flat_dir / (fmtchk_archive_name + '.fits.Z'))
+                            print(f'File {fmtchk_archive_name}.fits downloaded')
+                            os.system(f'uncompress {flat_dir / (fmtchk_archive_name + ".fits.Z")}')
 
 
 if __name__ == '__main__':
-    main(edr5_functions.edr5_dir / 'flat_2024_11_25')
+    main(paths.edr5_dir / 'calib_raw')

@@ -53,9 +53,9 @@ setup(
         'edibles_dr5': [
             # When adding files here, remember to update MANIFEST.in as well,
             # or else they will not be included in the distribution on PyPI!
-            # 'test_data/*',
-            # 'config_files/*',
-            # 'filter_profiles/*',
+            'flats/*',
+            'bias/*',
+            'esorex/*',
             # 'example_data/*'
         ]
     },
