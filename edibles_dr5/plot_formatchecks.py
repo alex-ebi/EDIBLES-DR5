@@ -21,20 +21,20 @@ for file in calib_dir.glob('*.fits'):
             data = [f[1].data, f[2].data]
     
     for i, img in enumerate(data):
-        im = plt.imshow(img.T)
-        plt.colorbar(im)
         if hdr['OBJECT'] == 'LAMP,FMTCHK':
             plot_dir = plot_dir_fmt
         elif hdr['OBJECT'] == 'LAMP,FLAT':
             plot_dir = plot_dir_flat
         else:
             continue
+        im = plt.imshow(img.T)
+        plt.colorbar(im)
 
         wave, setting = get_wave_path(hdr)
         print(f'{wave}_{setting}')
 
         if i == 0:
-            lu = 'l'
+            lu='l'
         elif i == 1:
             lu='u'
         (plot_dir / f'{wave:.0f}_{setting}{lu}').mkdir(exist_ok=True)
