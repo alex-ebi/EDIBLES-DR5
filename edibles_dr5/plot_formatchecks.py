@@ -20,10 +20,6 @@ for file in calib_dir.glob('*.fits'):
         else:
             data = [f[1].data, f[2].data]
     
-    wave, setting = get_wave_path(hdr)
-
-    print(f'{wave}_{setting}')
-
     for i, img in enumerate(data):
         im = plt.imshow(img.T)
         plt.colorbar(im)
@@ -33,6 +29,10 @@ for file in calib_dir.glob('*.fits'):
             plot_dir = plot_dir_flat
         else:
             continue
+
+        wave, setting = get_wave_path(hdr)
+        print(f'{wave}_{setting}')
+
         if i == 0:
             lu = 'l'
         elif i == 1:
