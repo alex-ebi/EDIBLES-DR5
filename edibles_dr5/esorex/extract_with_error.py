@@ -168,7 +168,7 @@ def modify_sof(sof_file, wm_file, fxb_file):
 def main():
     obs_list_path = '/home/alex/PycharmProjects/EDIBLES-DR5/edibles_dr5/supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
-    obs_list = obs_list.loc[obs_list.OBJECT == 'HD170740']
+    # obs_list = obs_list.loc[obs_list.OBJECT == 'HD170740']
     xfb_fxb_string = 'xfb'
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
