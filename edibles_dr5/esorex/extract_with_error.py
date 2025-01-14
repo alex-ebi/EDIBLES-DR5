@@ -113,18 +113,18 @@ def modify_sof(sof_file, wm_file, fxb_file):
     t2_human = Time(t2, format='mjd').iso.split(' ')[0]
 
     
-    superflat_name = f'{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}'
+    superflat_name = f'{wave_setting:.0f}nm_{setting}'
 
     if setting == 'blue':
-        super_flat_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_{superflat_name}.fits'
-        super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_bkg_{superflat_name}.fits'
+        super_flat_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_{superflat_name}_{t1_human}_{t2_human}.fits'
+        super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_bkg_{superflat_name}_{t1_human}_{t2_human}.fits'
         super_flat_file_u = super_flat_file_l
         super_flat_bkg_file_u = super_flat_bkg_file_l
     elif setting == 'red':
-        super_flat_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_{superflat_name}l.fits'
-        super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_bkg_{superflat_name}l.fits'
-        super_flat_file_u = paths.edr5_dir / 'superflats' / 'data' / f'superflat_{superflat_name}u.fits'
-        super_flat_bkg_file_u = paths.edr5_dir / 'superflats' / 'data' / f'superflat_bkg_{superflat_name}u.fits'
+        super_flat_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_{superflat_name}l_{t1_human}_{t2_human}.fits'
+        super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_bkg_{superflat_name}l_{t1_human}_{t2_human}.fits'
+        super_flat_file_u = paths.edr5_dir / 'superflats' / 'data' / f'superflat_{superflat_name}u_{t1_human}_{t2_human}.fits'
+        super_flat_bkg_file_u = paths.edr5_dir / 'superflats' / 'data' / f'superflat_bkg_{superflat_name}u_{t1_human}_{t2_human}.fits'
     else:
         raise ValueError('Wrong wavelength setting!')
     with open(sof_file, 'r') as f:
