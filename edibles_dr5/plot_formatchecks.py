@@ -17,7 +17,7 @@ for file in calib_dir.glob('*.fits'):
         if len(f) == 1:
             data = [f[0].data]
         else:
-            data = [f[1].data[0], f[2].data[0]]
+            data = [f[1].data, f[2].data]
 
     for i, img in enumerate(data):
         im = plt.imshow(img.T)
