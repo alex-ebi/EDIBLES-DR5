@@ -86,3 +86,4 @@ target/
 .ipynb_checkpoints
 
 edibles_dr5/paths.py
+paths.py
