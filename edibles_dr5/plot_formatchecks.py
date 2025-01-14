@@ -26,6 +26,8 @@ for file in calib_dir.glob('*.fits'):
             plot_dir = plot_dir_fmt
         elif hdr['OBJECT'] == 'LAMP,FLAT':
             plot_dir = plot_dir_flat
+        else:
+            continue
         plt.savefig(plot_dir / f'{hdr['DATE'][:10]}_{i}.png')
         # plt.show()
         plt.close()
