@@ -181,6 +181,8 @@ def main():
         file_set = set()
         for sub_dir in edps_object_dir.iterdir():
             science_files = list(sub_dir.glob('*resampled_science_*'))
+            if len(science_files) == 0:
+                continue
             with fits.open(science_files[0]) as f:
                 hdr = f[0].header
             if not(hdr['OBJECT'] == row['OBJECT'] and hdr['ESO TPL START'] == row['TPL START']):
