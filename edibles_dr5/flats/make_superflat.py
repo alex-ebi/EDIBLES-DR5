@@ -7,6 +7,8 @@ import psutil
 from edibles_dr5.paths import edr5_dir
 from edibles_dr5.flats.check_breakpoints import breakpoints
 from astropy.time import Time
+import sys
+import gc
 
 
 def save_fits_image(file, header, data):
@@ -15,6 +17,8 @@ def save_fits_image(file, header, data):
 
     hdul.writeto(file, overwrite=True)
 
+def shrink(data):
+    return data.reshape(int(data.shape[0]/2), 2, int(data.shape[1]/2), 2).sum(axis=1).sum(axis=2)
 
 def main():
     process = psutil.Process()
@@ -32,9 +36,10 @@ def main():
         for wave_setting, setting in setting_list:
             print('Setting:', setting, wave_setting)
             flat_name = f'masterflat_{setting}.fits'
+            flat_name = f'LAMP,FLAT_MASTER_FLAT_{setting.upper()}.fits'
             super_flat_dir = edr5_dir / 'superflats'
-            file_dir = edr5_dir / 'EDPS/UVES/flat'
-            # file_dir = edr5_dir / 'masterflats'
+            # file_dir = edr5_dir / 'EDPS/UVES/flat'
+            file_dir = edr5_dir / 'masterflats'
 
             file_list_start = list(file_dir.rglob(f'*{flat_name}'))
             # print('File list', file_list)
@@ -65,10 +70,11 @@ def main():
             norm_flat_list = []
             for file in file_list:
                 with fits.open(file) as f:
-                    hdr = f[0].header
-                    data = f[0].data
-                norm_flat_list.append(data / np.mean(data))
-                print(len(norm_flat_list), 'master flats -', 'Memory:', process.memory_info().rss / 1e9, 'GB')  # in bytes
+                    data = f[0].data / np.mean(f[0].data)
+                    data = shrink(data)
+                    norm_flat_list.append(data)
+                    print(len(norm_flat_list), 'master flats -', 'Memory:', process.memory_info().rss / 1e9, 'GB')  # in bytes
+                    gc.collect()
 
             norm_flat_list = np.array(norm_flat_list)
             std = np.std(norm_flat_list, axis=0)
@@ -87,7 +93,8 @@ def main():
             save_fits_image(super_flat_dir / 'data' / f'superflat_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', hdr, super_flat)
 
             # master background
-            bkg_file_list = [str(item).replace('masterflat_', 'masterflat_bkg_') for item in file_list]
+            # bkg_file_list = [str(item).replace('masterflat_', 'masterflat_bkg_') for item in file_list]
+            bkg_file_list = [str(item).replace('_MASTER_', '_BKG_') for item in file_list]
             bkg_list = []
 
             for file in bkg_file_list:
@@ -104,8 +111,10 @@ def main():
             for file in bkg_file_list:
                 with fits.open(file) as f:
                     hdr = f[0].header
-                    data = f[0].data
-                    norm_bkg_list.append(data / np.mean(data))
+                    data = f[0].data / np.mean(f[0].data)
+                    data = shrink(data)
+
+                    norm_bkg_list.append(data)
                     print(len(norm_bkg_list), 'master backgrounds -', 'Memory:', process.memory_info().rss / 1e9, 'GB')  # in bytes
 
             norm_bkg_list = np.array(norm_bkg_list)

@@ -80,7 +80,7 @@ def parse_fxb_name(wave_map_file, xfb_fxb_string='fxb'):
     return fxb_file
 
 
-def modify_sof(sof_file, wm_file, fxb_file):
+def modify_sof(sof_file, wm_file, fxb_file, time_dependent_flats=False):
     super_bias_blue = paths.edr5_dir / 'superbias/superbias_blue.fits'
     super_bias_redl = paths.edr5_dir / 'superbias/superbias_redl.fits'
     super_bias_redu = paths.edr5_dir / 'superbias/superbias_redu.fits'
@@ -112,19 +112,28 @@ def modify_sof(sof_file, wm_file, fxb_file):
     t1_human = Time(t1, format='mjd').iso.split(' ')[0]
     t2_human = Time(t2, format='mjd').iso.split(' ')[0]
 
+    if time_dependent_flats:
+        superflat_name = f'{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}'
+        superflat_name_l = f'{wave_setting:.0f}nm_{setting}l_{t1_human}_{t2_human}'
+        superflat_name_u = f'{wave_setting:.0f}nm_{setting}u_{t1_human}_{t2_human}'
+        superflat_dir = paths.edr5_dir / 'superflats' / 'data'
+    else:
+        superflat_name = f'{wave_setting:.0f}nm_{setting}'
+        superflat_name_l = f'{wave_setting:.0f}nm_{setting}l'
+        superflat_name_u = f'{wave_setting:.0f}nm_{setting}u'
+        superflat_dir = paths.edr5_dir / 'superflats'
     
-    superflat_name = f'{wave_setting:.0f}nm_{setting}'
 
     if setting == 'blue':
-        super_flat_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_{superflat_name}_{t1_human}_{t2_human}.fits'
-        super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_bkg_{superflat_name}_{t1_human}_{t2_human}.fits'
+        super_flat_file_l = superflat_dir / f'superflat_{superflat_name}.fits'
+        super_flat_bkg_file_l = superflat_dir / f'superflat_bkg_{superflat_name}.fits'
         super_flat_file_u = super_flat_file_l
         super_flat_bkg_file_u = super_flat_bkg_file_l
     elif setting == 'red':
-        super_flat_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_{superflat_name}l_{t1_human}_{t2_human}.fits'
-        super_flat_bkg_file_l = paths.edr5_dir / 'superflats' / 'data' / f'superflat_bkg_{superflat_name}l_{t1_human}_{t2_human}.fits'
-        super_flat_file_u = paths.edr5_dir / 'superflats' / 'data' / f'superflat_{superflat_name}u_{t1_human}_{t2_human}.fits'
-        super_flat_bkg_file_u = paths.edr5_dir / 'superflats' / 'data' / f'superflat_bkg_{superflat_name}u_{t1_human}_{t2_human}.fits'
+        super_flat_file_l = superflat_dir / f'superflat_{superflat_name_l}.fits'
+        super_flat_bkg_file_l = superflat_dir / f'superflat_bkg_{superflat_name_l}.fits'
+        super_flat_file_u = superflat_dir / f'superflat_{superflat_name_u}.fits'
+        super_flat_bkg_file_u = superflat_dir / f'superflat_bkg_{superflat_name_u}.fits'
     else:
         raise ValueError('Wrong wavelength setting!')
     with open(sof_file, 'r') as f:
@@ -149,15 +158,15 @@ def modify_sof(sof_file, wm_file, fxb_file):
         elif 'BKG_FLAT_REDU' in line:
             line_end = line.split(' ')[-1]
             lines[i] = f'{super_flat_bkg_file_u} {line_end}'
-        elif 'MASTER_BIAS_BLUE' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_bias_blue} {line_end}'
-        elif 'MASTER_BIAS_REDL' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_bias_redl} {line_end}'
-        elif 'MASTER_BIAS_REDU' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_bias_redu} {line_end}'
+        # elif 'MASTER_BIAS_BLUE' in line:
+        #     line_end = line.split(' ')[-1]
+        #     lines[i] = f'{super_bias_blue} {line_end}'
+        # elif 'MASTER_BIAS_REDL' in line:
+        #     line_end = line.split(' ')[-1]
+        #     lines[i] = f'{super_bias_redl} {line_end}'
+        # elif 'MASTER_BIAS_REDU' in line:
+        #     line_end = line.split(' ')[-1]
+        #     lines[i] = f'{super_bias_redu} {line_end}'
 
     new_sof_file = str(sof_file).replace('input.sof', 'input_edibles.sof')
     with open(new_sof_file, 'w') as f:
@@ -168,7 +177,7 @@ def modify_sof(sof_file, wm_file, fxb_file):
 def main():
     obs_list_path = '/home/alex/PycharmProjects/EDIBLES-DR5/edibles_dr5/supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
-    # obs_list = obs_list.loc[obs_list.OBJECT == 'HD170740']
+    obs_list = obs_list.loc[obs_list.OBJECT.str.strip(' ') == 'HD170740']
     xfb_fxb_string = 'xfb'
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
