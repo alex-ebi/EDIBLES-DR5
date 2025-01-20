@@ -80,7 +80,7 @@ def parse_fxb_name(wave_map_file, xfb_fxb_string='fxb'):
     return fxb_file
 
 
-def modify_sof(sof_file, wm_file, fxb_file, time_dependent_flats=False):
+def modify_sof(sof_file, wm_file, fxb_file, time_dependent_flats=True):
     super_bias_blue = paths.edr5_dir / 'superbias/superbias_blue.fits'
     super_bias_redl = paths.edr5_dir / 'superbias/superbias_redl.fits'
     super_bias_redu = paths.edr5_dir / 'superbias/superbias_redu.fits'
@@ -104,10 +104,15 @@ def modify_sof(sof_file, wm_file, fxb_file, time_dependent_flats=False):
     else:
         raise ValueError(f'Wrong setting suffix.')
     
+    print(breakpoints)
+    print(mjd_obs)
+    
     superflat_index = np.searchsorted(breakpoints, mjd_obs)
 
-    t1 = breakpoints[superflat_index]
-    t2 = breakpoints[superflat_index+1]
+    print(superflat_index)
+
+    t1 = breakpoints[superflat_index-1]
+    t2 = breakpoints[superflat_index]
 
     t1_human = Time(t1, format='mjd').iso.split(' ')[0]
     t2_human = Time(t2, format='mjd').iso.split(' ')[0]
@@ -182,6 +187,7 @@ def main():
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
     output_dir_online = paths.extracted_added_online
+    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/time_dep_flat')
 
     
     for i, row in obs_list.iterrows():
@@ -251,16 +257,19 @@ def main():
                 fxb_err_file = sub_dir / ('err' + parse_fxb_name(new_wm_file, xfb_fxb_string=xfb_fxb_string))
 
                 # Read wavelength map
+                print(new_wm_file)
                 wave_map = fits.open(new_wm_file)[0].data
 
                 wave_cols = wave_from_map(wave_map)
                 # print('wave map', wave_map)
 
-                # Open XFB file
-                with fits.open(fxb_file) as f:
-                    fxb_hdr = f[0].header
-                    fxb = f[0].data
-                    # print('fxb', fxb, np.shape(fxb))
+                try:
+                    # Open XFB file
+                    with fits.open(fxb_file) as f:
+                        fxb_hdr = f[0].header
+                        fxb = f[0].data
+                except FileNotFoundError:
+                    continue
                 # Open XFB error file
                 with fits.open(fxb_err_file) as f:
                     errfxb = f[0].data
