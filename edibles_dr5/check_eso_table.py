@@ -20,6 +20,7 @@ files = [
 for file, min_exp in files:
     df = pd.read_csv(file_dir / file, skipfooter=6)
     sub_df = df.loc[df.Exptime > min_exp]
+    print(len(sub_df)/5)
 
     plt.hist(df['TPL START'], bins=6, label='Full sample')
     plt.hist(sub_df['TPL START'], bins=6, label='Sample with time limit')

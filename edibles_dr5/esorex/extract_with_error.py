@@ -88,6 +88,8 @@ def modify_sof(sof_file, wm_file, fxb_file, time_dependent_flats=True):
     with fits.open(wm_file) as f:
         hdr = f[0].header
 
+    print(wm_file)
+
     mjd_obs = hdr['MJD-OBS']
 
     try:
@@ -163,15 +165,15 @@ def modify_sof(sof_file, wm_file, fxb_file, time_dependent_flats=True):
         elif 'BKG_FLAT_REDU' in line:
             line_end = line.split(' ')[-1]
             lines[i] = f'{super_flat_bkg_file_u} {line_end}'
-        # elif 'MASTER_BIAS_BLUE' in line:
-        #     line_end = line.split(' ')[-1]
-        #     lines[i] = f'{super_bias_blue} {line_end}'
-        # elif 'MASTER_BIAS_REDL' in line:
-        #     line_end = line.split(' ')[-1]
-        #     lines[i] = f'{super_bias_redl} {line_end}'
-        # elif 'MASTER_BIAS_REDU' in line:
-        #     line_end = line.split(' ')[-1]
-        #     lines[i] = f'{super_bias_redu} {line_end}'
+        elif 'MASTER_BIAS_BLUE' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_bias_blue} {line_end}'
+        elif 'MASTER_BIAS_REDL' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_bias_redl} {line_end}'
+        elif 'MASTER_BIAS_REDU' in line:
+            line_end = line.split(' ')[-1]
+            lines[i] = f'{super_bias_redu} {line_end}'
 
     new_sof_file = str(sof_file).replace('input.sof', 'input_edibles.sof')
     with open(new_sof_file, 'w') as f:
@@ -186,8 +188,9 @@ def main():
     xfb_fxb_string = 'xfb'
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
-    output_dir_online = paths.extracted_added_online
-    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/time_dep_flat')
+    # output_dir_online = paths.extracted_added_online
+    # output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/time_dep_flat')
+    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/super_bias')
 
     
     for i, row in obs_list.iterrows():
