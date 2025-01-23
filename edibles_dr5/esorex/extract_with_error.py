@@ -80,9 +80,27 @@ def parse_fxb_name(wave_map_file, xfb_fxb_string='fxb'):
     return fxb_file
 
 
-def modify_sof(sof_file, wm_file, fxb_file, time_dependent_flats=True):
-    """
-    Opens SOF file and saves modified copy with superflats for calibration.
+def modify_sof(sof_file: Path, wm_file: Path, fxb_file: Path, time_dependent_flats=True):
+    """Opens SOF file and saves modified copy with superflats for calibration.
+
+
+    Parameters
+    ----------
+    sof_file : Path
+        _description_
+    wm_file : Path
+        _description_
+    fxb_file : Path
+        _description_
+    time_dependent_flats : bool, optional
+        _description_, by default True
+
+    Raises
+    ------
+    ValueError
+        _description_
+    ValueError
+        _description_
     """
     
     super_bias_blue = paths.edr5_dir / 'superbias/superbias_blue.fits'
