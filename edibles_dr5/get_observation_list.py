@@ -1,5 +1,5 @@
 """
-Checking eso download table.
+Making table of all EDIBLES OB's.
 """
 import pandas as pd
 from importlib.resources import files
