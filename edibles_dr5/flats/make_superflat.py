@@ -65,6 +65,7 @@ def main():
             super_flat = np.mean(flat_list, axis=0)
             print(super_flat.shape)
             print("Length flat list: ", len(flat_list))
+            flat_list_len = len(flat_list)
             del flat_list
 
             norm_flat_list = []
@@ -87,6 +88,7 @@ def main():
             plt.colorbar(im2, ax=ax2)
             ax1.set_title('superflat')
             ax2.set_title('std superflat')
+            plt.figtext(0.01, 0.01, f"Length flat list: {flat_list_len}")
             plt.savefig(super_flat_dir / 'img' / f'superflat_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.png')
             plt.close()
 

@@ -68,11 +68,11 @@ def wave_from_map(wave_map):
 
 
 def parse_fxb_name(wave_map_file, xfb_fxb_string='fxb'):
-    if wave_map_file.name == 'wave_map_blue_bac.fits':
+    if wave_map_file.name == 'wave_map_blue.fits':
         fxb_file = f'{xfb_fxb_string}_blue.fits'
-    elif wave_map_file.name == 'wave_map_redl_bac.fits':
+    elif wave_map_file.name == 'wave_map_redl.fits':
         fxb_file = f'{xfb_fxb_string}_redl.fits'
-    elif wave_map_file.name == 'wave_map_redu_bac.fits':
+    elif wave_map_file.name == 'wave_map_redu.fits':
         fxb_file = f'{xfb_fxb_string}_redu.fits'
     else:
         print(wave_map_file.name)
@@ -88,7 +88,7 @@ def modify_sof(sof_file, wm_file, fxb_file, time_dependent_flats=True):
     with fits.open(wm_file) as f:
         hdr = f[0].header
 
-    print(wm_file)
+    print('Making modified copy with superflats of', wm_file)
 
     mjd_obs = hdr['MJD-OBS']
 
@@ -124,11 +124,16 @@ def modify_sof(sof_file, wm_file, fxb_file, time_dependent_flats=True):
         superflat_name_l = f'{wave_setting:.0f}nm_{setting}l_{t1_human}_{t2_human}'
         superflat_name_u = f'{wave_setting:.0f}nm_{setting}u_{t1_human}_{t2_human}'
         superflat_dir = paths.edr5_dir / 'superflats' / 'data'
+    # else:
+    #     superflat_name = f'{wave_setting:.0f}nm_{setting}'
+    #     superflat_name_l = f'{wave_setting:.0f}nm_{setting}l'
+    #     superflat_name_u = f'{wave_setting:.0f}nm_{setting}u'
+    #     superflat_dir = paths.edr5_dir / 'superflats'
     else:
-        superflat_name = f'{wave_setting:.0f}nm_{setting}'
-        superflat_name_l = f'{wave_setting:.0f}nm_{setting}l'
-        superflat_name_u = f'{wave_setting:.0f}nm_{setting}u'
-        superflat_dir = paths.edr5_dir / 'superflats'
+        superflat_name = f'{wave_setting:.0f}nm_{setting}_2016-04-22_2018-12-03'
+        superflat_name_l = f'{wave_setting:.0f}nm_{setting}l_2016-04-22_2018-12-03'
+        superflat_name_u = f'{wave_setting:.0f}nm_{setting}u_2016-04-22_2018-12-03'
+        superflat_dir = paths.edr5_dir / 'superflats' / 'data'
     
 
     if setting == 'blue':
@@ -182,60 +187,64 @@ def modify_sof(sof_file, wm_file, fxb_file, time_dependent_flats=True):
 
 
 def main():
-    obs_list_path = '/home/alex/PycharmProjects/EDIBLES-DR5/edibles_dr5/supporting_data/obs_names.csv'
+    obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
     obs_list = obs_list.loc[obs_list.OBJECT.str.strip(' ') == 'HD170740']
-    xfb_fxb_string = 'xfb'
+    xfb_fxb_string = 'xfb'  # xfb or fxb
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
-    # output_dir_online = paths.extracted_added_online
-    # output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/time_dep_flat')
-    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/super_bias')
+    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/two_superflats_test')
 
     
-    for i, row in obs_list.iterrows():
+    for _, row in obs_list.iterrows():  # Iterate through all OB's
         print('Row', row)
-        spec_list = []
+        spec_list = []  # This list will hold all order spectra from sub-integrations.
         file_set = set()
         for sub_dir in edps_object_dir.iterdir():
+            # List all resampled science files in EDPS directory
             science_files = list(sub_dir.glob('*resampled_science_*'))
+            # Skip sub-directory if there are no fully processed science files
             if len(science_files) == 0:
                 continue
             with fits.open(science_files[0]) as f:
                 hdr = f[0].header
+            # If the file does not match the current OB, skip
             if not(hdr['OBJECT'] == row['OBJECT'] and hdr['ESO TPL START'] == row['TPL START']):
                 print(hdr['ESO TPL START'])
                 continue
 
+            # Chdir to sub-directory
             print('Match. object', hdr['OBJECT'], 'time', hdr['ESO TPL START'])
-
             os.chdir(sub_dir)
 
+            # List all wave_maps. There can be one (blue) or two (red)
             all_wave_maps = list(sub_dir.glob('*wave_map*'))
+            # Exclude backup wavemaps
             wave_maps = [item for item in all_wave_maps if not item.name.endswith('_bac.fits')]
 
+            # If there is no wave map, make copy from the backup
             if len(wave_maps) == 0:
                 for wm_file in all_wave_maps:
                     if wm_file.name.endswith('_bac.fits'):
                         os.system(f'cp {wm_file} {str(wm_file).replace("_bac.fits", ".fits")}')
 
+            # List wave maps again
             wave_maps = list(sub_dir.glob('*wave_map*'))
             wave_maps = [item for item in wave_maps if not item.name.endswith('_bac.fits')]
-            # print(wave_maps)
 
-            new_wave_maps = []
-            for wm_file in wave_maps:
-                new_wm_file = Path(str(wm_file).replace('.fits', '_bac.fits'))
-                new_wave_maps.append(new_wm_file)
-                os.system(f'cp {wm_file} {new_wm_file}')
-
-            fxb_file = sub_dir / parse_fxb_name(new_wave_maps[0], xfb_fxb_string=xfb_fxb_string)
-
-            # Modify inpuf.sof file
+            # Modify inpuf.sof file to use super flats (and super bias)
+            fxb_file = sub_dir / parse_fxb_name(wave_maps[0], xfb_fxb_string=xfb_fxb_string)
             sof_file = sub_dir / 'input.sof'
-            modify_sof(sof_file, wm_file, fxb_file)
-    
-            if xfb_fxb_string == 'xfb':
+            modify_sof(sof_file, wave_maps[0], fxb_file)
+
+            # Make backup of wave map
+            for wm_file in wave_maps:
+                with fits.open(wm_file) as f:
+                    if f[0].header.get('MJD-OBS') is not None:
+                        os.system(f'cp {wm_file} {str(wm_file).replace("_bac.fits", ".fits")}')
+                
+            # Run esorex on input_edibles.sof
+            if xfb_fxb_string == 'xfb':  # flatfield pixel per pixel
                 os.system(f'/usr/bin/nice {paths.esorex_path} '
                         '--suppress-prefix=true '
                         f'--recipe-dir={paths.recipe_dir} '
@@ -244,7 +253,7 @@ def main():
                         f'--reduce.merge_delt1=14 --reduce.merge_delt2=4 '
                         f'{sub_dir / "input_edibles.sof"}')
 
-            elif xfb_fxb_string == 'fxb':
+            elif xfb_fxb_string == 'fxb':  # flatfield with extracted flat
                 os.system(f'/usr/bin/nice {paths.esorex_path} '
                         '--suppress-prefix=true '
                         f'--recipe-dir={paths.recipe_dir} '
@@ -252,49 +261,55 @@ def main():
                         f'uves_obs_scired --debug=true --reduce.tiltcorr=true '
                         f'{sub_dir / "input_edibles.sof"}')
             else:
-                raise ValueError('Wrong xfb string!')
+                raise ValueError('Wrong xfb_fxb_string!')
 
             # Extract reductions which were made with super flats
-            for new_wm_file in new_wave_maps:
-                fxb_file = sub_dir / parse_fxb_name(new_wm_file, xfb_fxb_string=xfb_fxb_string)
-                fxb_err_file = sub_dir / ('err' + parse_fxb_name(new_wm_file, xfb_fxb_string=xfb_fxb_string))
+            for wm_file in wave_maps:
+                fxb_file = sub_dir / parse_fxb_name(wm_file, xfb_fxb_string=xfb_fxb_string)
+                fxb_err_file = sub_dir / ('err' + parse_fxb_name(wm_file, xfb_fxb_string=xfb_fxb_string))
 
                 # Read wavelength map
-                print(new_wm_file)
-                wave_map = fits.open(new_wm_file)[0].data
-
+                print('Reading wave map', wm_file)
+                wave_map = fits.open(wm_file)[0].data
+                # get wavelengths from wave map
                 wave_cols = wave_from_map(wave_map)
-                # print('wave map', wave_map)
 
+                # Open XFB file. if none is found, skip it.
                 try:
-                    # Open XFB file
                     with fits.open(fxb_file) as f:
-                        fxb_hdr = f[0].header
-                        fxb = f[0].data
+                        xfb_hdr = f[0].header
+                        xfb_data = f[0].data
                 except FileNotFoundError:
                     continue
+
                 # Open XFB error file
                 with fits.open(fxb_err_file) as f:
                     errfxb = f[0].data
 
-                star_name = fxb_hdr['ESO OBS TARG NAME']
-                obs_time = fxb_hdr['ESO OBS START']
                 if 'blue' in fxb_file.name:
-                    wave_setting = fxb_hdr['ESO INS GRAT1 WLEN']
+                    wave_setting = xfb_hdr['ESO INS GRAT1 WLEN']
                 else:
-                    wave_setting = fxb_hdr['ESO INS GRAT2 WLEN']
+                    wave_setting = xfb_hdr['ESO INS GRAT2 WLEN']
 
-                for i, (w, f, err) in enumerate(zip(wave_cols, fxb, errfxb)):
+                star_name = xfb_hdr['ESO OBS TARG NAME']
+                obs_time = xfb_hdr['ESO OBS START']
+                
+                for i, (w, f, err) in enumerate(zip(wave_cols, xfb_data, errfxb)):
                     order = i + 1
-                    # Try to correct pixel shift
+
+                    # Correct pixel shift
                     w = w[1:]
                     f = f[:-1]
                     err = err[:-1]
+
+                    # Making name of final order product
                     name_end = fxb_file.name.replace(f"{xfb_fxb_string}_", "").replace(".fits", "_O") + f"{order}.fits"
                     file_name = f'{star_name}_{obs_time}_{wave_setting:.0f}nm_{name_end}'
                     spec = np.array([w, f, err])
 
-                    spec_list.append([file_name, spec, fxb_hdr])
+                    # Add spectrum information to list
+                    spec_list.append([file_name, spec, xfb_hdr])
+                    # Add file name to set of file names, so we have no duplicates
                     file_set.add(file_name)
 
         # Add spectra with same star name, setting, observation time and order
@@ -302,10 +317,10 @@ def main():
             print(file_name)
             flux_cols = []
             err_cols = []
-            for iter_name, spec, fxb_hdr in spec_list:
+            for iter_name, spec, xfb_hdr in spec_list:
                 if iter_name == file_name:
                     add_wave = spec[0]
-                    my_hdr = fxb_hdr
+                    my_hdr = xfb_hdr
                     flux_cols.append(spec[1])
                     err_cols.append(spec[2] ** 2)
                     # plt.plot(spec[0], spec[1] / np.mean(spec[1]))
@@ -317,10 +332,6 @@ def main():
                 add_error += err_col
 
             add_error = np.sqrt(add_error)
-
-            # plt.errorbar(add_wave, add_flux, yerr=add_error)
-            # plt.plot(add_wave, add_flux / np.mean(add_flux))
-            # plt.show()
 
             # Save file
             # Write data to file

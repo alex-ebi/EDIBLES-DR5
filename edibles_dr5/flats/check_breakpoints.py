@@ -13,7 +13,7 @@ breakpoint_file = files('edibles_dr5') / 'qc/fmtchk'
 
 # breakpoints=[56667, 57119, 57360, 57448, 57777, 58140, 58455]
 # breakpoints=[56667, 57119, 57448, 57777, 58140, 58455]
-breakpoints=[56667, 58455]
+breakpoints=[56667, 57448, 58455]
 
 print(breakpoints)
 for pp in breakpoints:
