@@ -206,8 +206,8 @@ def modify_sof(sof_file: Path, wm_file: Path, fxb_file: Path, time_dependent_fla
     with open(new_sof_file, 'w') as f:
         f.writelines(lines)
 
-# Dictionary of crop limits for order merging, dependent on setting wavelength
-crop_lim_dict = {346: [20, 20], 437: [17, 13], 564: [20, 5], 860: [15, 0]}
+# Dictionary of Merge_delt for order merging, dependent on setting wavelength. Units are in Angstrom.
+merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 0]}
 
 def main():
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
@@ -218,14 +218,21 @@ def main():
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
     output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/two_superflats')
 
+    # Make database of objects in EDPS directory with OBJECT names and TPL START
+    edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
+    print(edps_obs_df)
     
     for _, row in obs_list.iterrows():  # Iterate through all OB's
         print('Row', row)
         spec_list = []  # This list will hold all order spectra from sub-integrations.
         file_set = set()
-        for sub_dir in edps_object_dir.iterdir():
+        # Select the sub directories which contain data of the current OB
+        print(row)
+        sub_dirs = edps_obs_df.loc[(edps_obs_df.loc['OBJECT'] == row['OBJECT'] and edps_obs_df.loc['ESO TPL START'] == row['TPL START']), 'sub_dir']
+        for sub_dir in sub_dirs:
             # List all resampled science files in EDPS directory
             science_files = list(sub_dir.glob('*resampled_science_*'))
+
             # Skip sub-directory if there are no fully processed science files
             if len(science_files) == 0:
                 continue
@@ -233,10 +240,6 @@ def main():
                 hdr = f[0].header
 
             wave_setting, _ = edr5_functions.get_wave_path(hdr)
-
-            # If the file does not match the current OB, skip
-            if not(hdr['OBJECT'] == row['OBJECT'] and hdr['ESO TPL START'] == row['TPL START']):
-                continue
 
             # Chdir to sub-directory
             print('Match. object', hdr['OBJECT'], 'time', hdr['ESO TPL START'])
@@ -268,7 +271,7 @@ def main():
                     if f[0].header.get('MJD-OBS') is not None:
                         os.system(f'cp {wm_file} {str(wm_file).replace("_bac.fits", ".fits")}')
             
-            crop_limits = crop_lim_dict[wave_setting]
+            crop_limits = merge_delt_dict[wave_setting]
 
             # Run esorex on input_edibles.sof
             if xfb_fxb_string == 'xfb':  # flatfield pixel per pixel

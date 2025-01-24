@@ -87,3 +87,5 @@ target/
 
 edibles_dr5/paths.py
 paths.py
+
+tmp/*
