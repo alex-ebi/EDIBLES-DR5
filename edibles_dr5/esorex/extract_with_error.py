@@ -218,7 +218,7 @@ def main():
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
     output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/two_superflats')
 
-    # Make database of objects in EDPS directory with OBJECT names and TPL START
+    # Make / update database of objects in EDPS directory with OBJECT names and TPL START
     edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
     print(edps_obs_df)
     
@@ -228,7 +228,8 @@ def main():
         file_set = set()
         # Select the sub directories which contain data of the current OB
         print(row)
-        sub_dirs = edps_obs_df.loc[(edps_obs_df.loc['OBJECT'] == row['OBJECT'] and edps_obs_df.loc['ESO TPL START'] == row['TPL START']), 'sub_dir']
+        sub_dirs = edps_obs_df.loc[edps_obs_df['OBJECT'] == row['OBJECT'], :]
+        sub_dirs = sub_dirs.loc[sub_dirs['ESO TPL START'] == row['TPL START'], 'sub_dir']
         for sub_dir in sub_dirs:
             # List all resampled science files in EDPS directory
             science_files = list(sub_dir.glob('*resampled_science_*'))

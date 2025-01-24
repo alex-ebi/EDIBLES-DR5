@@ -13,10 +13,6 @@ breakpoint_file = files('edibles_dr5') / 'supporting_data/fmtchk'
 
 breakpoints=[56667, 57448, 58455]
 
-print(breakpoints)
-for pp in breakpoints:
-    print(Time(pp, format='mjd').iso.split(' ')[0], (pp, 10))
-
 def main():
     for file in data_dir.glob('*.txt'):
         data = np.genfromtxt(file, unpack=True, skip_header=2)
