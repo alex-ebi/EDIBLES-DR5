@@ -8,7 +8,7 @@ from astropy.io import fits
 from pprint import pprint
 import numpy as np
 from matplotlib import pyplot as plt
-from edibles_dr5 import paths
+from edibles_dr5 import paths, edr5_functions
 from edibles_dr5.flats.check_breakpoints import breakpoints
 from importlib.resources import files
 from astropy.time import Time
@@ -206,7 +206,8 @@ def modify_sof(sof_file: Path, wm_file: Path, fxb_file: Path, time_dependent_fla
     with open(new_sof_file, 'w') as f:
         f.writelines(lines)
 
-
+# Dictionary of crop limits for order merging, dependent on setting wavelength
+crop_lim_dict = {346: [20, 20], 437: [17, 13], 564: [20, 5], 860: [15, 0]}
 
 def main():
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
@@ -215,7 +216,7 @@ def main():
     xfb_fxb_string = 'xfb'  # xfb or fxb
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
-    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/two_superflats_test')
+    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/two_superflats')
 
     
     for _, row in obs_list.iterrows():  # Iterate through all OB's
@@ -230,9 +231,11 @@ def main():
                 continue
             with fits.open(science_files[0]) as f:
                 hdr = f[0].header
+
+            wave_setting, _ = edr5_functions.get_wave_path(hdr)
+
             # If the file does not match the current OB, skip
             if not(hdr['OBJECT'] == row['OBJECT'] and hdr['ESO TPL START'] == row['TPL START']):
-                print(hdr['ESO TPL START'])
                 continue
 
             # Chdir to sub-directory
@@ -264,7 +267,9 @@ def main():
                 with fits.open(wm_file) as f:
                     if f[0].header.get('MJD-OBS') is not None:
                         os.system(f'cp {wm_file} {str(wm_file).replace("_bac.fits", ".fits")}')
-                
+            
+            crop_limits = crop_lim_dict[wave_setting]
+
             # Run esorex on input_edibles.sof
             if xfb_fxb_string == 'xfb':  # flatfield pixel per pixel
                 os.system(f'/usr/bin/nice {paths.esorex_path} '
@@ -272,7 +277,7 @@ def main():
                         f'--recipe-dir={paths.recipe_dir} '
                         f'--output-dir={sub_dir} '
                         f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
-                        f'--reduce.merge_delt1=14 --reduce.merge_delt2=4 '
+                        f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
                         f'{sub_dir / "input_edibles.sof"}')
 
             elif xfb_fxb_string == 'fxb':  # flatfield with extracted flat
@@ -314,7 +319,7 @@ def main():
                     wave_setting = xfb_hdr['ESO INS GRAT2 WLEN']
 
                 star_name = xfb_hdr['ESO OBS TARG NAME']
-                obs_time = xfb_hdr['ESO OBS START']
+                obs_time = xfb_hdr['ESO TPL START']
                 
                 for i, (w, f, err) in enumerate(zip(wave_cols, xfb_data, errfxb)):
                     order = i + 1

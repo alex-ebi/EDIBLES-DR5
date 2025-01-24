@@ -1,5 +1,6 @@
 """
 Making table of all EDIBLES OB's.
+This is extracted from the download shellscript 'wdb_query_18095_eso_edibles.csv'
 """
 import pandas as pd
 from importlib.resources import files
