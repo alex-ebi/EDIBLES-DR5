@@ -212,15 +212,16 @@ merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 0]}
 def main():
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
-    obs_list = obs_list.loc[obs_list.OBJECT.str.strip(' ') == 'HD170740']
+    obs_list = obs_list.loc[obs_list.OBJECT.str.strip(' ') != 'HD170740']
+    obs_list = obs_list.iloc[25:]
     xfb_fxb_string = 'xfb'  # xfb or fxb
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
     output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/two_superflats')
+    cleanup = True
 
     # Make / update database of objects in EDPS directory with OBJECT names and TPL START
     edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
-    print(edps_obs_df)
     
     for _, row in obs_list.iterrows():  # Iterate through all OB's
         print('Row', row)
@@ -270,7 +271,7 @@ def main():
             for wm_file in wave_maps:
                 with fits.open(wm_file) as f:
                     if f[0].header.get('MJD-OBS') is not None:
-                        os.system(f'cp {wm_file} {str(wm_file).replace("_bac.fits", ".fits")}')
+                        os.system(f'cp {wm_file} {str(wm_file).replace(".fits", "_bac.fits")}')
             
             crop_limits = merge_delt_dict[wave_setting]
 
@@ -301,7 +302,8 @@ def main():
 
                 # Read wavelength map
                 print('Reading wave map', wm_file)
-                wave_map = fits.open(wm_file)[0].data
+                with fits.open(wm_file) as f:
+                    wave_map = f[0].data
                 # get wavelengths from wave map
                 wave_cols = wave_from_map(wave_map)
 
@@ -342,6 +344,8 @@ def main():
                     spec_list.append([file_name, spec, xfb_hdr])
                     # Add file name to set of file names, so we have no duplicates
                     file_set.add(file_name)
+            if cleanup:
+                edr5_functions.cleanup_edps_subdir(sub_dir)
 
         # Add spectra with same star name, setting, observation time and order
         for file_name in file_set:
@@ -376,8 +380,8 @@ def main():
 
             hdul = fits.HDUList(hdus=[primary_hdu, wl_hdu])
 
-            output_dir.mkdir(parents=True, exist_ok=True)
-            hdul.writeto(output_dir / file_name, overwrite=True)
+            # output_dir.mkdir(parents=True, exist_ok=True)
+            # hdul.writeto(output_dir / file_name, overwrite=True)
 
             if output_dir_online is not None:
                 output_dir_online.mkdir(parents=True, exist_ok=True)

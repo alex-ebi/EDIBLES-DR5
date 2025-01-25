@@ -1,9 +1,9 @@
 from pathlib import Path
 import numpy as np
-import sqlite3
 from importlib.resources import files
 from astropy.io import fits
 import pandas as pd
+import os
 
 
 def get_wave_path(hdr):
@@ -54,13 +54,24 @@ def wave_from_dispersion(flux, start_wave, dispersion, crpix=0):
     return wave
 
 
-def make_reduction_database(edps_object_dir: Path):
+def make_reduction_database(edps_object_dir: Path) -> pd.DataFrame:
     """
-    Makes a database of the directories in EDPS/UVES/objects to make it easier to find the reductions of certain observations.
-    """        
+    Makes a database of the directories in EDPS/UVES/objects to make it easier to find the reductions of certain 
+    observations.
+
+    Parameters
+    ----------
+    edps_object_dir : Path
+        Path to EDPS object directory.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame of object sub-directories ('sub_dir') with associated star name ('OBJECT') and observation date 
+        ('ESO TPL START')
+    """
     obj_dir_list = list(edps_object_dir.iterdir())
     edps_obj_list_file = files('edibles_dr5') / 'tmp' / 'edps_obs_list.pkl'
-    print(len(obj_dir_list))
 
     if edps_obj_list_file.is_file():
         edps_obs_df = pd.read_pickle(edps_obj_list_file)
@@ -89,6 +100,24 @@ def make_reduction_database(edps_object_dir: Path):
     return edps_obs_df
 
 
+def cleanup_edps_subdir(sub_dir: Path) -> None:
+    """
+    Deletes additional products from the esorex debug mode to conserve disk space.
 
-if __name__ == '__main__':
-    make_reduction_database()
+    Parameters
+    ----------
+    sub_dir : Path
+        _description_
+    """
+    name_beginnings = ['b_', 'crimage_', 'crmask_', 'errb_', 'errm_', 'errmf_', 'errmsky_', 
+                       'errwxfb_', 'errwxfsky_', 'errxfb_', 'err_xfsky_', 'errxmf_', 'intdisp_', 
+                       'm_', 'mf_', 'msky_', 'profile_', 'simulate_', 'weights_', 'wxfb_', 
+                       'wxfsky_', 'wxmf_', 'xfsky_', 'xmf_']
+
+    rm_str = '* '.join(name_beginnings) + '*'
+    if (sub_dir / 'profile_').is_file():
+        os.chdir(sub_dir)
+        print(f'rm {rm_str}')
+        os.system(f'rm {rm_str}')
+
+
