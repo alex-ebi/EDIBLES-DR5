@@ -379,11 +379,11 @@ def main():
             add_error = np.zeros(err_cols[0].shape)
             add_sky = np.zeros(err_cols[0].shape)
             add_xmf = np.zeros(err_cols[0].shape)
-            for err_col, my_flux in zip(err_cols, flux_cols, sky_cols, xmf_cols):
+            for err_col, my_flux, my_sky, my_xmf in zip(err_cols, flux_cols, sky_cols, xmf_cols):
                 add_flux += my_flux
                 add_error += err_col
-                add_sky += my_flux
-                add_xmf += my_flux
+                add_sky += my_sky
+                add_xmf += my_xmf
 
             add_error = np.sqrt(add_error)
 
