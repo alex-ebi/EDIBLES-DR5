@@ -11,7 +11,7 @@ from astropy.time import Time
 data_dir = files('edibles_dr5') / 'supporting_data/fmtchk'
 breakpoint_file = files('edibles_dr5') / 'supporting_data/fmtchk'
 
-breakpoints=[56667, 57448, 58455]
+breakpoints=[56667, 57448, 58850]
 
 def main():
     for file in data_dir.glob('*.txt'):

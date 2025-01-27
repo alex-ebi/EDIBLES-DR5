@@ -115,9 +115,7 @@ def cleanup_edps_subdir(sub_dir: Path) -> None:
                        'wxfsky_', 'wxmf_', 'xfsky_', 'xmf_']
 
     rm_str = '* '.join(name_beginnings) + '*'
-    if (sub_dir / 'profile_').is_file():
-        os.chdir(sub_dir)
-        print(f'rm {rm_str}')
-        os.system(f'rm {rm_str}')
+    os.chdir(sub_dir)
+    os.system(f'rm {rm_str}')
 
 

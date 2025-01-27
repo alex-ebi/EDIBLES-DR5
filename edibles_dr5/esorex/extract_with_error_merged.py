@@ -42,7 +42,7 @@ def main():
                     err_data = f[0].data
 
                 # star_name = hdr['ESO OBS TARG NAME']
-                star_name = hdr['OBJECT']
+                star_name = hdr['ESO OBS TARG NAME'].strip(' ')
                 obs_time = hdr['ESO TPL START']
 
                 error = err_data
@@ -73,8 +73,9 @@ def main():
             add_flux = np.zeros(flux_cols[0].shape)
             add_error = np.zeros(err_cols[0].shape)
             for err_col, my_flux in zip(err_cols, flux_cols):
-                add_flux += my_flux
-                add_error += err_col
+                if len(my_flux) == len(add_flux):
+                    add_flux += my_flux
+                    add_error += err_col
 
             add_error = np.sqrt(add_error)
 

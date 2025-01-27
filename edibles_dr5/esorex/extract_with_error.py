@@ -212,10 +212,11 @@ merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
 def main():
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
+    # obs_list = obs_list.iloc[44:]
     xfb_fxb_string = 'xfb'  # xfb or fxb
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
-    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/two_superflats')
+    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/orders')
     cleanup = True
 
     # Make / update database of objects in EDPS directory with OBJECT names and TPL START
@@ -295,8 +296,11 @@ def main():
 
             # Extract reductions which were made with super flats
             for wm_file in wave_maps:
-                fxb_file = sub_dir / parse_fxb_name(wm_file, xfb_fxb_string=xfb_fxb_string)
-                fxb_err_file = sub_dir / ('err' + parse_fxb_name(wm_file, xfb_fxb_string=xfb_fxb_string))
+                xfb_name = parse_fxb_name(wm_file, xfb_fxb_string=xfb_fxb_string)
+                fxb_file = sub_dir / xfb_name
+                fxb_err_file = sub_dir / ('err' + xfb_name)
+                sky_file = sub_dir / xfb_name.replace('xfb_', 'xfsky_')
+                flat_file = sub_dir / xfb_name.replace('xfb_', 'xmf_')
 
                 # Read wavelength map
                 print('Reading wave map', wm_file)
@@ -317,26 +321,36 @@ def main():
                 with fits.open(fxb_err_file) as f:
                     errfxb = f[0].data
 
+                # Open Sky file
+                with fits.open(sky_file) as f:
+                    xfsky = f[0].data
+
+                # Open extracted flat file
+                with fits.open(flat_file) as f:
+                    xmf = f[0].data
+
                 if 'blue' in fxb_file.name:
                     wave_setting = xfb_hdr['ESO INS GRAT1 WLEN']
                 else:
                     wave_setting = xfb_hdr['ESO INS GRAT2 WLEN']
 
-                star_name = xfb_hdr['ESO OBS TARG NAME']
+                star_name = xfb_hdr['ESO OBS TARG NAME'].strip(' ')
                 obs_time = xfb_hdr['ESO TPL START']
                 
-                for i, (w, f, err) in enumerate(zip(wave_cols, xfb_data, errfxb)):
+                for i, (w, f, err, sky_col, xmf_col) in enumerate(zip(wave_cols, xfb_data, errfxb, xfsky, xmf)):
                     order = i + 1
 
                     # Correct pixel shift
                     w = w[1:]
                     f = f[:-1]
                     err = err[:-1]
+                    sky_col = sky_col[:-1]
+                    xmf_col = xmf_col[:-1]
 
                     # Making name of final order product
                     name_end = fxb_file.name.replace(f"{xfb_fxb_string}_", "").replace(".fits", "_O") + f"{order}.fits"
                     file_name = f'{star_name}_{obs_time}_{wave_setting:.0f}nm_{name_end}'
-                    spec = np.array([w, f, err])
+                    spec = np.array([w, f, err, sky_col, xmf_col])
 
                     # Add spectrum information to list
                     spec_list.append([file_name, spec, xfb_hdr])
@@ -350,19 +364,26 @@ def main():
             print(file_name)
             flux_cols = []
             err_cols = []
+            sky_cols = []
+            xmf_cols = []
             for iter_name, spec, xfb_hdr in spec_list:
                 if iter_name == file_name:
                     add_wave = spec[0]
                     my_hdr = xfb_hdr
                     flux_cols.append(spec[1])
                     err_cols.append(spec[2] ** 2)
-                    # plt.plot(spec[0], spec[1] / np.mean(spec[1]))
+                    sky_cols.append(spec[3])
+                    xmf_cols.append(spec[4])
 
             add_flux = np.zeros(flux_cols[0].shape)
             add_error = np.zeros(err_cols[0].shape)
-            for err_col, my_flux in zip(err_cols, flux_cols):
+            add_sky = np.zeros(err_cols[0].shape)
+            add_xmf = np.zeros(err_cols[0].shape)
+            for err_col, my_flux in zip(err_cols, flux_cols, sky_cols, xmf_cols):
                 add_flux += my_flux
                 add_error += err_col
+                add_sky += my_flux
+                add_xmf += my_flux
 
             add_error = np.sqrt(add_error)
 
@@ -370,7 +391,9 @@ def main():
             # Write data to file
             columns = [fits.Column(name='WAVE', array=add_wave, format='D'),
                     fits.Column(name='FLUX', array=add_flux, format='D'),
-                    fits.Column(name='ERROR', array=add_error, format='D')]
+                    fits.Column(name='ERROR', array=add_error, format='D'),
+                    fits.Column(name='SKY', array=add_sky, format='D'),
+                    fits.Column(name='FLAT', array=add_xmf, format='D')]
 
             wl_hdu = fits.BinTableHDU.from_columns(columns)
 
