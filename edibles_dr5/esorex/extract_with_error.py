@@ -67,20 +67,20 @@ def wave_from_map(wave_map):
     return extr_cols
 
 
-def parse_fxb_name(wave_map_file, xfb_fxb_string='fxb'):
+def parse_xfb_name(wave_map_file):
     if wave_map_file.name == 'wave_map_blue.fits':
-        fxb_file = f'{xfb_fxb_string}_blue.fits'
+        xfb_file = 'xfb_blue.fits'
     elif wave_map_file.name == 'wave_map_redl.fits':
-        fxb_file = f'{xfb_fxb_string}_redl.fits'
+        xfb_file = 'xfb_redl.fits'
     elif wave_map_file.name == 'wave_map_redu.fits':
-        fxb_file = f'{xfb_fxb_string}_redu.fits'
+        xfb_file = 'xfb_redu.fits'
     else:
         print(wave_map_file.name)
         raise FileNotFoundError('No correct wavemap file!')
-    return fxb_file
+    return xfb_file
 
 
-def modify_sof(sof_file: Path, wm_file: Path, fxb_file: Path, time_dependent_flats=True):
+def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, time_dependent_flats=True):
     """Opens SOF file and saves modified copy with superflats for calibration.
 
 
@@ -90,7 +90,7 @@ def modify_sof(sof_file: Path, wm_file: Path, fxb_file: Path, time_dependent_fla
         _description_
     wm_file : Path
         _description_
-    fxb_file : Path
+    xfb_file : Path
         _description_
     time_dependent_flats : bool, optional
         _description_, by default True
@@ -107,23 +107,21 @@ def modify_sof(sof_file: Path, wm_file: Path, fxb_file: Path, time_dependent_fla
     super_bias_redl = paths.edr5_dir / 'superbias/superbias_redl.fits'
     super_bias_redu = paths.edr5_dir / 'superbias/superbias_redu.fits'
 
-    with fits.open(wm_file) as f:
-        hdr = f[0].header
-
     print('Making modified copy with superflats of', wm_file)
 
-    mjd_obs = hdr['MJD-OBS']
+    with fits.open(wm_file) as f:
+        hdr = f[0].header
 
     try:
         wave_setting = hdr['ESO INS GRAT1 WLEN']
     except KeyError:
         wave_setting = hdr['ESO INS GRAT2 WLEN']
 
-    if 'blue' in fxb_file.name:
+    if 'blue' in xfb_file.name:
         setting = 'blue'
-    elif 'redl' in fxb_file.name:
+    elif 'redl' in xfb_file.name:
         setting = 'red'
-    elif 'redu' in fxb_file.name:
+    elif 'redu' in xfb_file.name:
         setting = 'red'
     else:
         raise ValueError(f'Wrong setting suffix.')
@@ -146,11 +144,6 @@ def modify_sof(sof_file: Path, wm_file: Path, fxb_file: Path, time_dependent_fla
         superflat_name_l = f'{wave_setting:.0f}nm_{setting}l_{t1_human}_{t2_human}'
         superflat_name_u = f'{wave_setting:.0f}nm_{setting}u_{t1_human}_{t2_human}'
         superflat_dir = paths.edr5_dir / 'superflats' / 'data'
-    # else:
-    #     superflat_name = f'{wave_setting:.0f}nm_{setting}'
-    #     superflat_name_l = f'{wave_setting:.0f}nm_{setting}l'
-    #     superflat_name_u = f'{wave_setting:.0f}nm_{setting}u'
-    #     superflat_dir = paths.edr5_dir / 'superflats'
     else:
         superflat_name = f'{wave_setting:.0f}nm_{setting}_2016-04-22_2018-12-03'
         superflat_name_l = f'{wave_setting:.0f}nm_{setting}l_2016-04-22_2018-12-03'
@@ -192,15 +185,15 @@ def modify_sof(sof_file: Path, wm_file: Path, fxb_file: Path, time_dependent_fla
         elif 'BKG_FLAT_REDU' in line:
             line_end = line.split(' ')[-1]
             lines[i] = f'{super_flat_bkg_file_u} {line_end}'
-        elif 'MASTER_BIAS_BLUE' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_bias_blue} {line_end}'
-        elif 'MASTER_BIAS_REDL' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_bias_redl} {line_end}'
-        elif 'MASTER_BIAS_REDU' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_bias_redu} {line_end}'
+        # elif 'MASTER_BIAS_BLUE' in line:
+        #     line_end = line.split(' ')[-1]
+        #     lines[i] = f'{super_bias_blue} {line_end}'
+        # elif 'MASTER_BIAS_REDL' in line:
+        #     line_end = line.split(' ')[-1]
+        #     lines[i] = f'{super_bias_redl} {line_end}'
+        # elif 'MASTER_BIAS_REDU' in line:
+        #     line_end = line.split(' ')[-1]
+        #     lines[i] = f'{super_bias_redu} {line_end}'
 
     new_sof_file = str(sof_file).replace('input.sof', 'input_edibles.sof')
     with open(new_sof_file, 'w') as f:
@@ -212,12 +205,13 @@ merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
 def main():
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
-    # obs_list = obs_list.iloc[44:]
-    xfb_fxb_string = 'xfb'  # xfb or fxb
+    obs_list = obs_list.iloc[6:7]
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
-    output_dir = paths.edr5_dir / f'extracted_added_{xfb_fxb_string}'
+    output_dir = paths.edr5_dir / 'extracted_added_xfb'
     output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/orders')
+    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/test')
     cleanup = True
+    output_dir_online.mkdir(exist_ok=True)
 
     # Make / update database of objects in EDPS directory with OBJECT names and TPL START
     edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
@@ -262,9 +256,9 @@ def main():
             wave_maps = [item for item in wave_maps if not item.name.endswith('_bac.fits')]
 
             # Modify inpuf.sof file to use super flats (and super bias)
-            fxb_file = sub_dir / parse_fxb_name(wave_maps[0], xfb_fxb_string=xfb_fxb_string)
+            fxb_file = sub_dir / parse_xfb_name(wave_maps[0])
             sof_file = sub_dir / 'input.sof'
-            modify_sof(sof_file, wave_maps[0], fxb_file)
+            modify_sof(sof_file, wave_maps[0], fxb_file, row['MJD-OBS'])
 
             # Make backup of wave map
             for wm_file in wave_maps:
@@ -275,28 +269,20 @@ def main():
             crop_limits = merge_delt_dict[wave_setting]
 
             # Run esorex on input_edibles.sof
-            if xfb_fxb_string == 'xfb':  # flatfield pixel per pixel
-                os.system(f'/usr/bin/nice {paths.esorex_path} '
-                        '--suppress-prefix=true '
-                        f'--recipe-dir={paths.recipe_dir} '
-                        f'--output-dir={sub_dir} '
-                        f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
-                        f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
-                        f'{sub_dir / "input_edibles.sof"}')
-
-            elif xfb_fxb_string == 'fxb':  # flatfield with extracted flat
-                os.system(f'/usr/bin/nice {paths.esorex_path} '
-                        '--suppress-prefix=true '
-                        f'--recipe-dir={paths.recipe_dir} '
-                        f'--output-dir={sub_dir} '
-                        f'uves_obs_scired --debug=true --reduce.tiltcorr=true '
-                        f'{sub_dir / "input_edibles.sof"}')
-            else:
-                raise ValueError('Wrong xfb_fxb_string!')
+            # flatfield pixel per pixel
+            os.system(f'/usr/bin/nice {paths.esorex_path} '
+                    '--suppress-prefix=true '
+                    f'--recipe-dir={paths.recipe_dir} '
+                    f'--output-dir={sub_dir} '
+                    f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
+                    f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
+                    # '--reduce.extract.skymethod="linear" '
+                    '--reduce.extract.method="linear" '
+                    f'{sub_dir / "input_edibles.sof"}')
 
             # Extract reductions which were made with super flats
             for wm_file in wave_maps:
-                xfb_name = parse_fxb_name(wm_file, xfb_fxb_string=xfb_fxb_string)
+                xfb_name = parse_xfb_name(wm_file)
                 fxb_file = sub_dir / xfb_name
                 fxb_err_file = sub_dir / ('err' + xfb_name)
                 sky_file = sub_dir / xfb_name.replace('xfb_', 'xfsky_')
@@ -348,7 +334,7 @@ def main():
                     xmf_col = xmf_col[:-1]
 
                     # Making name of final order product
-                    name_end = fxb_file.name.replace(f"{xfb_fxb_string}_", "").replace(".fits", "_O") + f"{order}.fits"
+                    name_end = fxb_file.name.replace("xfb_", "").replace(".fits", "_O") + f"{order}.fits"
                     file_name = f'{star_name}_{obs_time}_{wave_setting:.0f}nm_{name_end}'
                     spec = np.array([w, f, err, sky_col, xmf_col])
 
