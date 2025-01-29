@@ -215,8 +215,6 @@ def main():
 
     # Make / update database of objects in EDPS directory with OBJECT names and TPL START
     edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
-
-    print(edps_obs_df)
     
     for _, row in obs_list.iterrows():  # Iterate through all OB's
         print('Row', row)
@@ -278,7 +276,8 @@ def main():
                     f'--output-dir={sub_dir} '
                     f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
                     f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
-                    '--reduce.extract.oversample=20 '
+                    # '--reduce.extract.skymethod="linear" '
+                    '--reduce.extract.method="linear" '
                     f'{sub_dir / "input_edibles.sof"}')
 
             # Extract reductions which were made with super flats
