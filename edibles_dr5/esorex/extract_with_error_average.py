@@ -358,17 +358,14 @@ def main():
                     my_hdr = xfb_hdr
                     flux_cols.append(spec[1])
                     err_cols.append(spec[2] ** 2)
-                    # sky_cols.append(spec[3])
                     xmf_cols.append(spec[3])
 
             add_flux = np.zeros(flux_cols[0].shape)
             add_error = np.zeros(err_cols[0].shape)
-            # add_sky = np.zeros(err_cols[0].shape)
             add_xmf = np.zeros(err_cols[0].shape)
             for err_col, my_flux, my_xmf in zip(err_cols, flux_cols, xmf_cols):
                 add_flux += my_flux
                 add_error += err_col
-                # add_sky += my_sky
                 add_xmf += my_xmf
 
             add_error = np.sqrt(add_error)
@@ -378,7 +375,6 @@ def main():
             columns = [fits.Column(name='WAVE', array=add_wave, format='D'),
                     fits.Column(name='FLUX', array=add_flux, format='D'),
                     fits.Column(name='ERROR', array=add_error, format='D'),
-                    # fits.Column(name='SKY', array=add_sky, format='D'),
                     fits.Column(name='FLAT', array=add_xmf, format='D')]
 
             wl_hdu = fits.BinTableHDU.from_columns(columns)

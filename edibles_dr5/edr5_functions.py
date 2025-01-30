@@ -109,13 +109,18 @@ def cleanup_edps_subdir(sub_dir: Path) -> None:
     sub_dir : Path
         _description_
     """
-    name_beginnings = ['b_', 'crimage_', 'crmask_', 'errb_', 'errm_', 'errmf_', 'errmsky_', 
-                       'errwxfb_', 'errwxfsky_', 'errxfb_', 'err_xfsky_', 'errxmf_', 'intdisp_', 
-                       'm_', 'mf_', 'msky_', 'profile_', 'simulate_', 'weights_', 'wxfb_', 
-                       'wxfsky_', 'wxmf_', 'xfsky_', 'xmf_']
 
-    rm_str = '* '.join(name_beginnings) + '*'
-    os.chdir(sub_dir)
+    file_list = list(sub_dir.glob('*.fits'))
+
+    file_list = [item for item in file_list if 'resampled_science_' not in item.name]
+    file_list = [item for item in file_list if 'wave_map' not in item.name]
+    file_list = [item for item in file_list if 'merged_sky' not in item.name]
+    file_list = [str(item) for item in file_list]
+
+    rm_str = ' '.join(file_list)
+
+    print(f'rm {rm_str}')
+
     os.system(f'rm {rm_str}')
 
 

@@ -137,7 +137,7 @@ os.system(f'edps -w uves.uves_wkf -i {edr5_dir / "HD170740_07_05"}')
 # In[ ]:
 
 
-from edibles_dr5.esorex import extract_with_error
+from edibles_dr5.esorex import extract_with_error_optimal
 
-extract_with_error.main()
+extract_with_error_optimal.main()
 
