@@ -205,11 +205,10 @@ merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
 def main():
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
-    obs_list = obs_list.iloc[6:7]
+    # obs_list = obs_list.iloc[6:7]
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / 'extracted_added_xfb'
     output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/orders')
-    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/test')
     cleanup = True
     output_dir_online.mkdir(exist_ok=True)
 
@@ -256,6 +255,7 @@ def main():
             # List wave maps again
             wave_maps = list(sub_dir.glob('*wave_map*'))
             wave_maps = [item for item in wave_maps if not item.name.endswith('_bac.fits')]
+            wave_maps = [item for item in wave_maps if not item.name.endswith('_2.fits')]
 
             # Modify inpuf.sof file to use super flats (and super bias)
             fxb_file = sub_dir / parse_xfb_name(wave_maps[0])
@@ -278,7 +278,6 @@ def main():
                     f'--output-dir={sub_dir} '
                     f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
                     f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
-                    '--reduce.extract.oversample=20 '
                     f'{sub_dir / "input_edibles.sof"}')
 
             # Extract reductions which were made with super flats
@@ -288,6 +287,7 @@ def main():
                 fxb_err_file = sub_dir / ('err' + xfb_name)
                 sky_file = sub_dir / xfb_name.replace('xfb_', 'xfsky_')
                 flat_file = sub_dir / xfb_name.replace('xfb_', 'xmf_')
+                resampled_file = xfb_name.replace('xfb_', 'resampled_science_')
 
                 # Read wavelength map
                 print('Reading wave map', wm_file)
@@ -316,6 +316,15 @@ def main():
                 with fits.open(flat_file) as f:
                     xmf = f[0].data
 
+                # Open resampled sceince file
+                with fits.open(resampled_file) as f:
+                    hdr_sci = f[0].header
+
+                # Add header information of resmapled file to header
+                for key, item in hdr_sci.items():
+                    if key not in list(xfb_hdr.keys()):
+                        xfb_hdr[key] = (item, hdr_sci.comments[key])
+
                 if 'blue' in fxb_file.name:
                     wave_setting = xfb_hdr['ESO INS GRAT1 WLEN']
                 else:
@@ -340,7 +349,7 @@ def main():
                     spec = np.array([w, f, err, sky_col, xmf_col])
 
                     # Add spectrum information to list
-                    spec_list.append([file_name, spec, xfb_hdr])
+                    spec_list.append([order, file_name, spec, xfb_hdr])
                     # Add file name to set of file names, so we have no duplicates
                     file_set.add(file_name)
             if cleanup:
@@ -353,7 +362,8 @@ def main():
             err_cols = []
             sky_cols = []
             xmf_cols = []
-            for iter_name, spec, xfb_hdr in spec_list:
+            obj_fwhms = []
+            for order, iter_name, spec, xfb_hdr in spec_list:
                 if iter_name == file_name:
                     add_wave = spec[0]
                     my_hdr = xfb_hdr
@@ -361,6 +371,19 @@ def main():
                     err_cols.append(spec[2] ** 2)
                     sky_cols.append(spec[3])
                     xmf_cols.append(spec[4])
+                    my_fwhm = xfb_hdr[f'ESO QC ORD{order} OBJ FWHM']
+                    # Get pixel scale
+                    pix_scale = xfb_hdr['ESO INS PIXSCALE']
+                    # Get slit width in arc seconds
+                    if 'blue' in file_name:
+                        slit_width = xfb_hdr['ESO INS SLIT2 LEN']
+                    else:
+                        slit_width = xfb_hdr['ESO INS SLIT3 LEN']
+                    
+                    # Calculate object FWHM relative to extraction slit
+                    rel_fwhm = my_fwhm / slit_width * pix_scale
+
+                    obj_fwhms.append(rel_fwhm)
 
             add_flux = np.zeros(flux_cols[0].shape)
             add_error = np.zeros(err_cols[0].shape)
@@ -373,6 +396,9 @@ def main():
                 add_xmf += my_xmf
 
             add_error = np.sqrt(add_error)
+
+            max_rel_fwhm = np.nanmax(obj_fwhms)
+            my_hdr['REL OBJ FWHM'] = (max_rel_fwhm, 'Object FWHM relative to extraction slit width.')
 
             # Save file
             # Write data to file

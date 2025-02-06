@@ -131,7 +131,7 @@ def main():
             test_spec_list = np.array(test_spec_list)
             super_flat = np.mean(flat_list, axis=0)
             super_test_spec = np.mean(test_spec_list, axis=0)
-            super_test_spec_2 = slice_order(super_flat, wave_setting, setting)
+            # super_test_spec_2 = slice_order(super_flat, wave_setting, setting)
             super_test_spec = test_spec_list[0]
 
 

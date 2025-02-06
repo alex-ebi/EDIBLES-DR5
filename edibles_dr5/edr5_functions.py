@@ -119,8 +119,6 @@ def cleanup_edps_subdir(sub_dir: Path) -> None:
 
     rm_str = ' '.join(file_list)
 
-    print(f'rm {rm_str}')
-
     os.system(f'rm {rm_str}')
 
 
