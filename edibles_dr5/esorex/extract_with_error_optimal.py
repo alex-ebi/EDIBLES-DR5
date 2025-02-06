@@ -103,10 +103,6 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, time_depe
         _description_
     """
     
-    super_bias_blue = paths.edr5_dir / 'superbias/superbias_blue.fits'
-    super_bias_redl = paths.edr5_dir / 'superbias/superbias_redl.fits'
-    super_bias_redu = paths.edr5_dir / 'superbias/superbias_redu.fits'
-
     print('Making modified copy with superflats of', wm_file)
 
     with fits.open(wm_file) as f:
@@ -185,15 +181,6 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, time_depe
         elif 'BKG_FLAT_REDU' in line:
             line_end = line.split(' ')[-1]
             lines[i] = f'{super_flat_bkg_file_u} {line_end}'
-        # elif 'MASTER_BIAS_BLUE' in line:
-        #     line_end = line.split(' ')[-1]
-        #     lines[i] = f'{super_bias_blue} {line_end}'
-        # elif 'MASTER_BIAS_REDL' in line:
-        #     line_end = line.split(' ')[-1]
-        #     lines[i] = f'{super_bias_redl} {line_end}'
-        # elif 'MASTER_BIAS_REDU' in line:
-        #     line_end = line.split(' ')[-1]
-        #     lines[i] = f'{super_bias_redu} {line_end}'
 
     new_sof_file = str(sof_file).replace('input.sof', 'input_edibles.sof')
     with open(new_sof_file, 'w') as f:
