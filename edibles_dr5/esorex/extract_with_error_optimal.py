@@ -192,10 +192,11 @@ merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
 def main():
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
-    # obs_list = obs_list.iloc[6:7]
+    obs_list = obs_list.iloc[:7]
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / 'extracted_added_xfb'
     output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/orders')
+    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/orders_optimal_oversampled')
     cleanup = True
     output_dir_online.mkdir(exist_ok=True)
 
@@ -265,6 +266,7 @@ def main():
                     f'--output-dir={sub_dir} '
                     f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
                     f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
+                    '--reduce.extract.oversample=20'
                     f'{sub_dir / "input_edibles.sof"}')
 
             # Extract reductions which were made with super flats

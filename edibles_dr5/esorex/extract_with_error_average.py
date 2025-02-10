@@ -205,7 +205,7 @@ merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
 def main():
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
-    obs_list = obs_list.iloc[6:7]
+    # obs_list = obs_list.iloc[6:7]
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / 'extracted_added_xfb'
     output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/orders_average')
