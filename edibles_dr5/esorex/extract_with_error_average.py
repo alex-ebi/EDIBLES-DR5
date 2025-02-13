@@ -278,6 +278,7 @@ def main():
                     f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
                     f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
                     '--reduce.extract.method="average" '
+                    '--reduce.skysub="false" '
                     f'{sub_dir / "input_edibles.sof"}')
 
             # Extract reductions which were made with super flats
@@ -334,7 +335,7 @@ def main():
                     xmf_col = xmf_col[:-1]
 
                     # Making name of final order product
-                    name_end = fxb_file.name.replace("xfb_", "").replace(".fits", "_O") + f"{order}.fits"
+                    name_end = fxb_file.name.replace("xfb_", "").replace(".fits", "_O").replace('_2_', '_') + f"{order}.fits"
                     file_name = f'{star_name}_{obs_time}_{wave_setting:.0f}nm_{name_end}'
                     spec = np.array([w, f, err, xmf_col])
 
