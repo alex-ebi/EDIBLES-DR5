@@ -320,7 +320,7 @@ def main():
                 else:
                     wave_setting = xfb_hdr['ESO INS GRAT2 WLEN']
 
-                star_name = xfb_hdr['ESO OBS TARG NAME'].strip(' ')
+                star_name = xfb_hdr['ESO OBS TARG NAME'].replace(' ', '')
                 obs_time = xfb_hdr['ESO TPL START']
                 
                 for i, (w, f, err, sky_col, xmf_col) in enumerate(zip(wave_cols, xfb_data, errfxb, xfsky, xmf)):

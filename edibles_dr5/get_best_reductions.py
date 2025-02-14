@@ -13,17 +13,18 @@ from pathlib import Path
 opt_spec_dir = Path('/home/alex/diss_dibs/edibles_reduction/orders')
 avg_spec_dir = Path('/home/alex/diss_dibs/edibles_reduction/orders_average')
 best_spec_dir = Path('/home/alex/diss_dibs/edibles_reduction/orders_best')
+
 obs_list = pd.read_csv(files('edibles_dr5') / 'supporting_data/obs_names.csv')
 
 settings = ['blue', 'redl', 'redu']
 
-fwhm_threshold = 0.2
+fwhm_threshold = 0.25
 
 def main():
     best_spec_dir.mkdir(exist_ok=True)
     for i, row in obs_list.iterrows():
         print(i)
-        star_name = row.OBJECT.strip(' ')
+        star_name = row.OBJECT.replace(' ', '')
         obs_date = row['TPL START']
 
         for setting in settings:

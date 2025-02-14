@@ -42,7 +42,7 @@ def main():
                     err_data = f[0].data
 
                 # star_name = hdr['ESO OBS TARG NAME']
-                star_name = hdr['ESO OBS TARG NAME'].strip(' ')
+                star_name = hdr['ESO OBS TARG NAME'].replace(' ', '')
                 obs_time = hdr['ESO TPL START']
 
                 error = err_data

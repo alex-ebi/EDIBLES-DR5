@@ -305,7 +305,7 @@ def main():
                 wave_setting, wave_path = edr5_functions.get_wave_path(red_hdr)
 
 
-                star_name = red_hdr['ESO OBS TARG NAME'].strip(' ')
+                star_name = red_hdr['ESO OBS TARG NAME'].replace(' ', '')
                 obs_time = red_hdr['ESO TPL START']
                 
 
