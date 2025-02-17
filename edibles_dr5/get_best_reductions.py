@@ -16,7 +16,7 @@ best_spec_dir = Path('/home/alex/diss_dibs/edibles_reduction/orders_best')
 
 obs_list = pd.read_csv(files('edibles_dr5') / 'supporting_data/obs_names.csv')
 
-settings = ['blue', 'redl', 'redu']
+settings = ['blue', 'red']
 
 fwhm_threshold = 0.25
 
