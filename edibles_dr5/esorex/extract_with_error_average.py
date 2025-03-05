@@ -103,10 +103,6 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, time_depe
         _description_
     """
     
-    super_bias_blue = paths.edr5_dir / 'superbias/superbias_blue.fits'
-    super_bias_redl = paths.edr5_dir / 'superbias/superbias_redl.fits'
-    super_bias_redu = paths.edr5_dir / 'superbias/superbias_redu.fits'
-
     print('Making modified copy with superflats of', wm_file)
 
     with fits.open(wm_file) as f:
@@ -185,15 +181,6 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, time_depe
         elif 'BKG_FLAT_REDU' in line:
             line_end = line.split(' ')[-1]
             lines[i] = f'{super_flat_bkg_file_u} {line_end}'
-        # elif 'MASTER_BIAS_BLUE' in line:
-        #     line_end = line.split(' ')[-1]
-        #     lines[i] = f'{super_bias_blue} {line_end}'
-        # elif 'MASTER_BIAS_REDL' in line:
-        #     line_end = line.split(' ')[-1]
-        #     lines[i] = f'{super_bias_redl} {line_end}'
-        # elif 'MASTER_BIAS_REDU' in line:
-        #     line_end = line.split(' ')[-1]
-        #     lines[i] = f'{super_bias_redu} {line_end}'
 
     new_sof_file = str(sof_file).replace('input.sof', 'input_edibles.sof')
     with open(new_sof_file, 'w') as f:
@@ -202,15 +189,13 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, time_depe
 # Dictionary of Merge_delt for order merging, dependent on setting wavelength. Units are in Angstrom.
 merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
 
-def main():
+def main(output_dir_online=None):
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
     # obs_list = obs_list.iloc[6:7]
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
-    output_dir = paths.edr5_dir / 'extracted_added_xfb'
-    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/orders_average')
+    output_dir = paths.edr5_dir / 'extracted_added_average'
     cleanup = True
-    output_dir_online.mkdir(exist_ok=True)
 
     # Make / update database of objects in EDPS directory with OBJECT names and TPL START
     edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
@@ -384,13 +369,13 @@ def main():
 
             hdul = fits.HDUList(hdus=[primary_hdu, wl_hdu])
 
-            # output_dir.mkdir(parents=True, exist_ok=True)
-            # hdul.writeto(output_dir / file_name, overwrite=True)
+            output_dir.mkdir(parents=True, exist_ok=True)
+            hdul.writeto(output_dir / file_name, overwrite=True)
 
             if output_dir_online is not None:
                 output_dir_online.mkdir(parents=True, exist_ok=True)
                 # Make file name which is valid for windows
-                file_name_online = file_name  # .replace(':', '_')
+                file_name_online = file_name
                 hdul.writeto(output_dir_online / file_name_online, overwrite=True)
 
 

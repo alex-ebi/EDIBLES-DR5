@@ -189,16 +189,14 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, time_depe
 # Dictionary of Merge_delt for order merging, dependent on setting wavelength. Units are in Angstrom.
 merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
 
-def main():
+def main(output_dir_online=None):
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
     # obs_list = obs_list.iloc[4:5]
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / 'extracted_added_xfb'
-    output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/orders')
-    # output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/orders_optimal_oversampled')
+
     cleanup = True
-    output_dir_online.mkdir(exist_ok=True)
 
     # Make / update database of objects in EDPS directory with OBJECT names and TPL START
     edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
@@ -404,8 +402,8 @@ def main():
 
             hdul = fits.HDUList(hdus=[primary_hdu, wl_hdu])
 
-            # output_dir.mkdir(parents=True, exist_ok=True)
-            # hdul.writeto(output_dir / file_name, overwrite=True)
+            output_dir.mkdir(parents=True, exist_ok=True)
+            hdul.writeto(output_dir / file_name, overwrite=True)
 
             if output_dir_online is not None:
                 output_dir_online.mkdir(parents=True, exist_ok=True)
