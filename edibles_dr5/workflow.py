@@ -6,7 +6,7 @@
 # 
 # ## Parameters:
 # ### General:
-# Night: 2017 01 01 .. 2017 12 31
+# Night: 2014 01 01 .. 2019 12 31
 # User defined input: LAMP,FLAT\
 # Mode: ECHELLE\
 # Slit: FREE
@@ -40,13 +40,14 @@
 # 
 # 
 
-# In[1]:
+# In[2]:
 
 
 import os
 from edibles_dr5.paths import edr5_dir, edps_dir
 from importlib.resources import files
 
+edr5_dir.mkdir(exist_ok=True)
 flat_dir = edr5_dir / 'calib_raw'
 
 
@@ -85,7 +86,7 @@ download_associated_bias_orderdef.main(flat_dir)
 
 # ## Make master flats with EDPS
 
-# In[2]:
+# In[ ]:
 
 
 print(f'{edps_dir / "bin/python3"} {edps_dir / "bin/edps"} -w uves.uves_wkf -i {flat_dir} -t flat')
@@ -103,12 +104,26 @@ from edibles_dr5.flats import make_superflat
 make_superflat.main()
 
 
+# # Download EDIBLES data
+
+# In[ ]:
+
+
+edibles_raw_dir = edr5_dir / 'EDIBLES_raw'
+edibles_raw_dir.mkdir(exist_ok=True)
+
+os.chdir(edibles_raw_dir)
+
+os.system(f'chmod u+x {download_script_dir / "downloadScript_EDIBLES_sample.sh"}')
+os.system(f'{download_script_dir / "downloadScript_EDIBLES_sample.sh"}')
+
+
 # ## Run EDPS reduction on object data
 
 # In[ ]:
 
 
-os.system(f'{edps_dir / "bin/python3"} {edps_dir / "bin/edps"} -w uves.uves_wkf -i {edr5_dir / "HD170740_07_2017"}')
+os.system(f'{edps_dir / "bin/python3"} {edps_dir / "bin/edps"} -w uves.uves_wkf -i {edibles_raw_dir}')
 
 
 # ## Rerun reductions with superflats
