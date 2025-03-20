@@ -263,7 +263,7 @@ def main(output_dir_online=None):
                     f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
                     f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
                     '--reduce.extract.method="average" '
-                    '--reduce.skysub="false" '
+                    # '--reduce.skysub="false" '
                     f'{sub_dir / "input_edibles.sof"}')
 
             # Extract reductions which were made with super flats
@@ -380,4 +380,4 @@ def main(output_dir_online=None):
 
 
 if __name__ == '__main__':
-    main()
+    main(output_dir_online=Path('/home/alex/diss_dibs/edibles_reduction/orders_average_sky_sub'))
