@@ -11,14 +11,12 @@ from pathlib import Path
 
 
 opt_spec_dir = Path('/home/alex/diss_dibs/edibles_reduction/orders')
-avg_spec_dir = Path('/home/alex/diss_dibs/edibles_reduction/orders_average')
-best_spec_dir = Path('/home/alex/diss_dibs/edibles_reduction/orders_best')
+avg_spec_dir = Path('/home/alex/diss_dibs/edibles_reduction/orders_average_sky_sub')
+best_spec_dir = Path('/home/alex/spectra/EDR5/orders')
 
 obs_list = pd.read_csv(files('edibles_dr5') / 'supporting_data/obs_names.csv')
+reduction_grade_list = pd.read_csv(files('edibles_dr5') / 'supporting_data/best_reductions.csv', index_col=0, na_values=['na'])
 
-settings = ['blue', 'red']
-
-fwhm_threshold = 0.25
 
 def main():
     best_spec_dir.mkdir(exist_ok=True)
@@ -27,33 +25,27 @@ def main():
         star_name = row.OBJECT.replace(' ', '')
         obs_date = row['TPL START']
 
-        for setting in settings:
-            spec_list = list(opt_spec_dir.rglob('*.fits'))
-            spec_list = [item for item in spec_list if star_name in item.name]
-            spec_list = [item for item in spec_list if setting in item.name]
+        spec_list = list(opt_spec_dir.rglob('*.fits'))
+        spec_list = [item for item in spec_list if star_name in item.name]
 
-            if isinstance(obs_date, str):
-                spec_list = [item for item in spec_list if obs_date in item.name]
+        if isinstance(obs_date, str):
+            spec_list = [item for item in spec_list if obs_date in item.name]
 
-            if len(spec_list) == 0:
+        if len(spec_list) == 0:
+            continue
+
+        grade_row = reduction_grade_list.loc[reduction_grade_list['DATE-OBS'] == obs_date]
+        
+        for spec_path in spec_list:
+            grade_row = reduction_grade_list.loc[reduction_grade_list['spec_path'] == spec_path.name].dropna()
+            if grade_row.size == 0:
                 continue
-
-            fwhm_list = []
-
-            for spec_path in spec_list:
-                hdul = fits.open(spec_path)
-
-                hdr = hdul[0].header
-
-                fwhm_list.append(hdr['REL OBJ FWHM'])
-            
-            max_fwhm = max(fwhm_list)
-
-            if max_fwhm > fwhm_threshold:
+            grade_row = reduction_grade_list.loc[reduction_grade_list['spec_path'] == spec_path.name].iloc[0]
+            if grade_row.method == 'average':
                 spec_list = [avg_spec_dir / item.name for item in spec_list]
-            
-            for spec_path in spec_list:
-                os.system(f'cp {spec_path} {best_spec_dir / spec_path.name}')
+            elif grade_row.method == 'na':
+                continue
+            os.system(f'cp {spec_path} {best_spec_dir / spec_path.name}')
   
 
 

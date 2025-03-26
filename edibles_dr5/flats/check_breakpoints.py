@@ -17,6 +17,7 @@ def main():
     for file in data_dir.glob('*.txt'):
         data = np.genfromtxt(file, unpack=True, skip_header=2)
         plt.scatter(data[0], data[1], label=file.name)
+        plt.scatter(data[0], data[2], label=file.name, marker='x')
 
     for pp in breakpoints:
         plt.axvline(pp, linestyle='--')

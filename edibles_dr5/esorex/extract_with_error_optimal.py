@@ -196,7 +196,7 @@ def main(output_dir_online=None):
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / 'extracted_added_xfb'
 
-    cleanup = True
+    cleanup = False
 
     # Make / update database of objects in EDPS directory with OBJECT names and TPL START
     edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
@@ -262,10 +262,11 @@ def main(output_dir_online=None):
                     '--suppress-prefix=true '
                     f'--recipe-dir={paths.recipe_dir} '
                     f'--output-dir={sub_dir} '
-                    f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
+                    # f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
+                    f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" --reduce.extract.profile="virtual" --reduce.objslit=50 '
                     f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
                     '--reduce.extract.oversample=20 '
-                    '--reduce.extract.skymethod="optimal" '
+                    '--reduce.extract.skymethod="median" '
                     f'{sub_dir / "input_edibles.sof"}')
 
             # Extract reductions which were made with super flats
@@ -413,4 +414,4 @@ def main(output_dir_online=None):
 
 
 if __name__ == '__main__':
-    main()
+    main(output_dir_online=None)
