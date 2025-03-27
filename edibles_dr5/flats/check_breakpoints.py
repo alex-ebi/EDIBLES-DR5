@@ -16,7 +16,7 @@ breakpoints = pd.read_csv(breakpoint_file, index_col=0)
 def main():
     for file in data_dir.glob('*.txt'):
         data = np.genfromtxt(file, unpack=True, skip_header=2)
-        # plt.scatter(data[0], data[1], label=file.name)
+        plt.scatter(data[0], data[1], label=file.name)
         plt.scatter(data[0], data[2], label=file.name.replace('dy', 'dx'), marker='x')
 
     for i, row in breakpoints.iterrows():

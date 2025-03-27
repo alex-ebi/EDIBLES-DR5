@@ -380,4 +380,4 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
 
 
 if __name__ == '__main__':
-    main(output_dir_online=Path('/home/alex/diss_dibs/edibles_reduction/orders_average_sky_sub'))
+    main(output_dir_online=Path('/home/alex/diss_dibs/edibles_reduction/time_dep_flat'))
