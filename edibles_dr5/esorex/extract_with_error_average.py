@@ -9,7 +9,6 @@ from pprint import pprint
 import numpy as np
 from matplotlib import pyplot as plt
 from edibles_dr5 import paths, edr5_functions
-from edibles_dr5.flats.check_breakpoints import breakpoints
 from importlib.resources import files
 from astropy.time import Time
 import pandas as pd
@@ -80,7 +79,7 @@ def parse_xfb_name(wave_map_file):
     return xfb_file
 
 
-def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, time_dependent_flats=True):
+def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, breakpoints, time_dependent_flats=True):
     """Opens SOF file and saves modified copy with superflats for calibration.
 
 
@@ -196,7 +195,7 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / 'extracted_added_average'
     cleanup = True
-    breakpoints = pd.read_csv(breakpoint_file, index_col=0)
+    breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:, 'MJD'].values
 
     # Make / update database of objects in EDPS directory with OBJECT names and TPL START
     edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
@@ -245,7 +244,7 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
             # Modify inpuf.sof file to use super flats (and super bias)
             fxb_file = sub_dir / parse_xfb_name(wave_maps[0])
             sof_file = sub_dir / 'input.sof'
-            modify_sof(sof_file, wave_maps[0], fxb_file, row['MJD-OBS'])
+            modify_sof(sof_file, wave_maps[0], fxb_file, row['MJD-OBS'], breakpoints)
 
             # Make backup of wave map
             for wm_file in wave_maps:

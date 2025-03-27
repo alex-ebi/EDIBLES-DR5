@@ -5,10 +5,15 @@ from pathlib import Path
 from pprint import pprint
 import psutil
 from edibles_dr5.paths import edr5_dir
-from edibles_dr5.flats.check_breakpoints import breakpoints
 from astropy.time import Time
 import sys
 import gc
+from importlib.resources import files
+import pandas as pd
+
+
+breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_3.csv'
+breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:,'MJD'].values
 
 
 def save_fits_image(file, header, data):
