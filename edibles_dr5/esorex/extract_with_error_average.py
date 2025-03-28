@@ -128,8 +128,11 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, breakpoin
 
     print(superflat_index)
 
-    t1 = breakpoints[superflat_index-1]
-    t2 = breakpoints[superflat_index]
+    try:
+        t1 = breakpoints[superflat_index-1]
+        t2 = breakpoints[superflat_index]
+    except IndexError:
+        return False
 
     t1_human = Time(t1, format='mjd').iso.split(' ')[0]
     t2_human = Time(t2, format='mjd').iso.split(' ')[0]
@@ -184,6 +187,7 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, breakpoin
     new_sof_file = str(sof_file).replace('input.sof', 'input_edibles.sof')
     with open(new_sof_file, 'w') as f:
         f.writelines(lines)
+    return True
 
 # Dictionary of Merge_delt for order merging, dependent on setting wavelength. Units are in Angstrom.
 merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
@@ -244,7 +248,7 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
             # Modify inpuf.sof file to use super flats (and super bias)
             fxb_file = sub_dir / parse_xfb_name(wave_maps[0])
             sof_file = sub_dir / 'input.sof'
-            modify_sof(sof_file, wave_maps[0], fxb_file, row['MJD-OBS'], breakpoints)
+            flat_found = modify_sof(sof_file, wave_maps[0], fxb_file, row['MJD-OBS'], breakpoints)
 
             # Make backup of wave map
             for wm_file in wave_maps:
