@@ -89,3 +89,5 @@ edibles_dr5/paths.py
 paths.py
 
 edibles_dr5/tmp/*
+
+.~lock*
