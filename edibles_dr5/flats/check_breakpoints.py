@@ -10,7 +10,7 @@ from astropy.time import Time
 import pandas as pd
 
 data_dir = files('edibles_dr5') / 'supporting_data/fmtchk'
-breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_3.csv'
+breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_4.csv'
 breakpoints = pd.read_csv(breakpoint_file, index_col=0)
 
 def main():
