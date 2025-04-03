@@ -262,11 +262,11 @@ def main(output_dir_online=None):
                     '--suppress-prefix=true '
                     f'--recipe-dir={paths.recipe_dir} '
                     f'--output-dir={sub_dir} '
-                    # f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
-                    f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" --reduce.extract.profile="virtual" --reduce.objslit=50 '
+                    f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
+                    # f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" --reduce.extract.profile="virtual" --reduce.objslit=50 '
                     f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
                     '--reduce.extract.oversample=20 '
-                    '--reduce.extract.skymethod="median" '
+                    # '--reduce.extract.skymethod="median" '
                     f'{sub_dir / "input_edibles.sof"}')
 
             # Extract reductions which were made with super flats

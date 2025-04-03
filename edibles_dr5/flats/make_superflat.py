@@ -12,7 +12,7 @@ from importlib.resources import files
 import pandas as pd
 
 
-breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_3.csv'
+breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_4.csv'
 breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:,'MJD'].values
 
 
@@ -97,6 +97,10 @@ def main():
             plt.savefig(super_flat_dir / 'img' / f'superflat_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.png')
             plt.close()
 
+            # add file names of used flats to header
+            for i, file_name in enumerate(file_list):
+                hdr.append((f'MASTERFLAT_{i}', file_name.parent.parent.name))
+
             save_fits_image(super_flat_dir / 'data' / f'superflat_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', hdr, super_flat)
 
             # master background
@@ -137,6 +141,10 @@ def main():
             ax2.set_title('std superflat BKG')
             plt.savefig(super_flat_dir / 'img' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.png')
             plt.close()
+
+            # add file names of used flats to header
+            for i, file_name in enumerate(bkg_file_list):
+                hdr.append((f'MASTERBKG_{i}', Path(file_name).parent.parent.name))
 
             save_fits_image(super_flat_dir / 'data' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', hdr, super_flat_bkg)
 
