@@ -195,7 +195,7 @@ merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
 def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_4.csv'):
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
-    obs_list = obs_list.loc[(obs_list['MJD-OBS'] > 57352) & (obs_list['MJD-OBS'] < 57777)]
+    # obs_list = obs_list.loc[(obs_list['MJD-OBS'] > 57352) & (obs_list['MJD-OBS'] < 57777)]
     # obs_list = obs_list.iloc[6:7]
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / 'extracted_added_average'
@@ -268,8 +268,7 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                     f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
                     f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
                     '--reduce.extract.method="average" '
-                    # '--reduce.skysub="false" '
-                    f'{sub_dir / "input_edibles.sof"}')
+                    f'{sub_dir / "input.sof"}')
 
             # Extract reductions which were made with super flats
             for wm_file in wave_maps:
@@ -385,4 +384,4 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
 
 
 if __name__ == '__main__':
-    main(output_dir_online=Path('/home/alex/spectra/EDR5/orders'))
+    main(output_dir_online=Path('/home/alex/diss_dibs/edibles_reduction/no_superflat'))
