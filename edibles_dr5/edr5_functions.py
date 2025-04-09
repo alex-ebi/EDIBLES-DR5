@@ -73,13 +73,13 @@ def make_reduction_database(edps_object_dir: Path) -> pd.DataFrame:
     obj_dir_list = list(edps_object_dir.iterdir())
     edps_obj_list_file = files('edibles_dr5') / 'tmp' / 'edps_obs_list.pkl'
 
-    if edps_obj_list_file.is_file():
-        edps_obs_df = pd.read_pickle(edps_obj_list_file)
-        obj_dir_list = [item for item in obj_dir_list if item not in edps_obs_df['sub_dir'].values]
-        edps_obs_list = list(edps_obs_df.itertuples(index=False))
+    # if edps_obj_list_file.is_file():
+    #     edps_obs_df = pd.read_pickle(edps_obj_list_file)
+    #     obj_dir_list = [item for item in obj_dir_list if item not in edps_obs_df['sub_dir'].values]
+    #     edps_obs_list = list(edps_obs_df.itertuples(index=False))
  
-    else: 
-        edps_obs_list = []
+    # else: 
+    edps_obs_list = []
 
     for sub_dir in obj_dir_list:
         # List all resampled science files in EDPS directory
