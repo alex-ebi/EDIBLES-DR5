@@ -14,6 +14,7 @@ breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_4.csv'
 breakpoints = pd.read_csv(breakpoint_file, index_col=0)
 
 def main():
+    plt.figure(figsize=(12, 7))
     for file in data_dir.glob('*.txt'):
         data = np.genfromtxt(file, unpack=True, skip_header=2)
         plt.scatter(data[0], data[1], label=file.name)
@@ -24,9 +25,15 @@ def main():
         plt.axvline(pp, linestyle='--')
         date = Time(pp, format='mjd').iso.split(' ')[0]
         breakpoints.loc[i, 'DATE-OBS'] = date
-        plt.annotate(date, (pp, 10))
+        if date == '2015-11-26':
+            plt.annotate(date, (pp, 11))
+        else:
+            plt.annotate(date, (pp, 10))
     
     breakpoints.to_csv(breakpoint_file)
+    plt.xlabel('MJD (days)')
+    plt.ylabel('dx or dy (pixels)')
+    plt.ylim(ymax=12)
     plt.legend()
     plt.show()
 
