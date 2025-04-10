@@ -90,7 +90,7 @@ def make_reduction_database(edps_object_dir: Path) -> pd.DataFrame:
         with fits.open(science_files[0]) as f:
             hdr = f[0].header
         # If the file does not match the current OB, skip
-        star_name = hdr['OBJECT'].strip(' ')
+        star_name = hdr['OBJECT'].replace(' ', '')
         eso_tpl_start = hdr['ESO TPL START']
         edps_obs_list.append((sub_dir, star_name, eso_tpl_start))   
 

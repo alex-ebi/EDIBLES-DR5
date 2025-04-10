@@ -11,7 +11,7 @@ import pandas as pd
 def main():
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
-    obs_list = obs_list.loc[obs_list.OBJECT.str.strip(' ') != 'HD170740']
+    obs_list = obs_list.loc[obs_list.OBJECT.str.replace(' ', '') != 'HD170740']
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir_online = Path('/home/alex/diss_dibs/edibles_reduction/extracted_merged')
 
