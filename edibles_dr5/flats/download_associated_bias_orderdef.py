@@ -36,8 +36,8 @@ def main(flat_dir):
 
         # Removing flats which have the wrong wavelength setting
         if wave not in [346.0, 437.0, 564.0, 860.0]:
-            print("NOT WHAT WE WANT!!!!!!!!!!!!!!!!!!!")
-            print(wave)
+            # print("NOT WHAT WE WANT!!!!!!!!!!!!!!!!!!!")
+            # print(wave)
             # os.system(f'rm {file}')
             continue
 
@@ -47,8 +47,20 @@ def main(flat_dir):
 
         if filter_name != my_filter_name:
             print("NOT WHAT WE WANT!!!!!!!!!!!!!!!!!!!")
-            # os.system(f'rm {file}')
+            print(filter_name, my_filter_name)
             continue
+
+        # Download nightlog
+        night_log_file = Path(str(file).replace('.fits', '.NL.txt'))
+
+        if not night_log_file.is_file():
+            dp_id = file.name.replace('.fits', '.NL')
+            print(dp_id)
+            download_url = f'http://archive.eso.org/datalink/links?ID=ivo://eso.org/ID?{dp_id}&eso_download=file'
+            print(f'Retrieving file {dp_id}')
+            urllib.request.urlretrieve(download_url, filename=flat_dir / (dp_id + '.txt'))
+            print(f'File {flat_dir / (dp_id + ".txt")} downloaded')
+
 
         night_log_file = Path(str(file).replace('.fits', '.NL.txt'))
 
@@ -102,4 +114,5 @@ def main(flat_dir):
 
 
 if __name__ == '__main__':
+    print(paths.edr5_dir / 'calib_raw')
     main(paths.edr5_dir / 'calib_raw')
