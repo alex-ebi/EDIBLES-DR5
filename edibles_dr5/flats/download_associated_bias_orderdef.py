@@ -58,7 +58,11 @@ def main(flat_dir):
             print(dp_id)
             download_url = f'http://archive.eso.org/datalink/links?ID=ivo://eso.org/ID?{dp_id}&eso_download=file'
             print(f'Retrieving file {dp_id}')
-            urllib.request.urlretrieve(download_url, filename=flat_dir / (dp_id + '.txt'))
+            try:
+                urllib.request.urlretrieve(download_url, filename=flat_dir / (dp_id + '.txt'))
+            except urllib.error.HTTPError:
+                print(f'File {flat_dir / (dp_id + ".txt")} not found')
+                os.system(f'rm {file}')
             print(f'File {flat_dir / (dp_id + ".txt")} downloaded')
 
 
