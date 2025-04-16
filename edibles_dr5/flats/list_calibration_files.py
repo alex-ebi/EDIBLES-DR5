@@ -2,7 +2,7 @@ from astropy.io import fits
 import pandas as pd
 from edibles_dr5 import edr5_functions, paths
 from importlib.resources import files
-
+import numpy as np
 
 
 def main(flat_dir):
@@ -14,7 +14,7 @@ def main(flat_dir):
         with fits.open(file) as f:
             hdr = f[0].header
 
-        if hdr['OBJECT'] == 'BIAS':
+        if hdr['ESO DPR TYPE'] != 'LAMP,FLAT':
             continue
 
         # Get wavelength and path (red or blue) of flat
@@ -27,15 +27,21 @@ def main(flat_dir):
             # os.system(f'rm {file}')
             continue
 
-        # print(hdr['MJD-OBS'])
-        # print(hdr['DATE-OBS'])
-        # print(hdr['OBJECT'])
         flat_bin = breakpoints['MJD'].searchsorted(hdr['MJD-OBS'])
 
-        s = pd.Series([file.name, wave, hdr['ESO DPR TYPE'], hdr['DATE-OBS'], hdr['MJD-OBS'], flat_bin], index=['name', 'wave', 'ESO DPR TYPE', 'DATE-OBS', 'MJD-OBS', 'flat_bin'])
+        s = pd.Series([file.name, wave, hdr['ESO DPR TYPE'], hdr['DATE-OBS'], hdr['MJD-OBS'], hdr['EXPTIME'], flat_bin], index=['name', 'wave', 'ESO DPR TYPE', 'DATE-OBS', 'MJD-OBS', 'EXPTIME', 'flat_bin'])
         df = pd.concat((df, s), axis=1, ignore_index=True)
 
-    df = df.T.sort_values(by=['flat_bin', 'wave', 'MJD-OBS'])
+    df = df.T.sort_values(by=['flat_bin', 'wave', 'EXPTIME'], ascending=[True, True, False], ignore_index=True)
+
+    included_idx = []
+
+    for bin_id in df['flat_bin'].unique():
+        for wave in df['wave'].unique():
+            sub_idx = df.loc[(df['flat_bin'] == bin_id) & (df['wave']==wave)].iloc[:100].index.array
+            included_idx = np.concat((included_idx, sub_idx))
+
+    df = df.loc[included_idx].reindex()
     
     df.to_csv(files('edibles_dr5') / 'supporting_data/flat_list.csv')
 

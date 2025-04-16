@@ -25,14 +25,18 @@ for file, setting in files:
     for i, row in breakpoints.iloc[:-1].iterrows():
         bps = (breakpoints.loc[i, 'MJD'], breakpoints.loc[i+1, 'MJD'])
         bpdates = (breakpoints.loc[i, 'DATE-OBS'], breakpoints.loc[i+1, 'DATE-OBS'])
-        sub_df = df.loc[(df['MJD-OBS'] > bps[0]) & (df['MJD-OBS'] < bps[1])]
+        sub_df = df.loc[(df['MJD-OBS'] > bps[0]) & (df['MJD-OBS'] < bps[1])]#.sort_values(by='Exptime').iloc[:100]
 
         # Make grouped Dataframe to find calibrations with highest Exptime
-        gdf = sub_df.groupby(by='TPL START')['Exptime'].mean().sort_values(ascending=False).iloc[:30]
-        print(gdf.index)
+        g_series = sub_df.groupby(by='TPL START')['Exptime'].mean().sort_values(ascending=False).iloc[:30]
+        print(g_series.index)
+        print('serries',g_series)
 
-        sub_df = sub_df.loc[sub_df['TPL START'].isin(gdf.index)]
+        out_df = pd.DataFrame()
+        for i, row in g_series.items():
+            tmp = sub_df.loc[sub_df['TPL START']==i]
+            out_df = pd.concat((out_df, tmp), ignore_index=True)
 
-        print(sub_df)
-        sub_df.to_csv(out_dir / f'{setting}nm_{bpdates[0]}_{bpdates[1]}.csv')
+        print(out_df)
+        out_df.to_csv(out_dir / f'{setting}nm_{bpdates[0]}_{bpdates[1]}.csv')
 
