@@ -32,6 +32,8 @@ def main():
         [564.0, 'redl'], [564.0, 'redu'],
                     ]
     
+    superflat_df = pd.DataFrame()
+
     for t1, t2 in zip(breakpoints[:-1], breakpoints[1:]):
         print(t1, t2)
         t1_human = Time(t1, format='mjd').iso.split(' ')[0]
@@ -147,6 +149,12 @@ def main():
                 hdr.append((f'MASTERBKG_{i}', Path(file_name).parent.parent.name))
 
             save_fits_image(super_flat_dir / 'data' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', hdr, super_flat_bkg)
+
+            # Add information about superflat to superflat DataFrame
+            s = pd.Series(data=[f'superflat_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', flat_list_len, t1_human, t2_human], index=['file_name', 'n_masterflats', 'start_date', 'end_date'])
+            superflat_df = pd.concat((superflat_df, s), ignore_index=True, axis=1)
+        
+    superflat_df.T.to_csv(files('edibles_dr5') / 'supporting_data/superflat_list.csv')
 
 
 if __name__ == '__main__':
