@@ -249,15 +249,6 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
             # Modify inpuf.sof file to use super flats (and super bias)
             fxb_file = sub_dir / parse_xfb_name(wave_maps[0])
             sof_file = sub_dir / 'input.sof'
-
-            with open(sof_file, 'r') as f:
-                lines = f.readlines()
-
-            for i, line in enumerate(lines):
-                if 'MASTER_FLAT_' in line:
-                    flat_dir = line.split(' ')[-1]
-                    lines[i] = f'{super_flat_file_l} {line_end}'
-
             flat_found = modify_sof(sof_file, wave_maps[0], fxb_file, row['MJD-OBS'], breakpoints)
 
             # Make backup of wave map

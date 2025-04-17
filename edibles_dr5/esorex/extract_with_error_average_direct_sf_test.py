@@ -102,87 +102,37 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, breakpoin
         _description_
     """
     
-    print('Making modified copy with superflats of', wm_file)
+    print('Making modified sof:', str(sof_file).replace('.sof', '_edibles.sof'))
 
     with fits.open(wm_file) as f:
         hdr = f[0].header
 
-    try:
-        wave_setting = hdr['ESO INS GRAT1 WLEN']
-    except KeyError:
-        wave_setting = hdr['ESO INS GRAT2 WLEN']
+    wave, wave_setting = edr5_functions.get_wave_path(hdr)
 
-    if 'blue' in xfb_file.name:
+    # print('ws', wave, wave_setting)
+
+    if 'blue' in wave_setting:
         setting = 'blue'
-    elif 'redl' in xfb_file.name:
-        setting = 'red'
-    elif 'redu' in xfb_file.name:
+    elif 'red' in wave_setting:
         setting = 'red'
     else:
         raise ValueError(f'Wrong setting suffix.')
-    
-    print(breakpoints)
-    print(mjd_obs)
-    
-    superflat_index = np.searchsorted(breakpoints, mjd_obs)
+        
+    flat_bin = np.searchsorted(breakpoints['MJD'], mjd_obs)
 
-    print(superflat_index)
+    calib_flat_dir = paths.edr5_dir / 'selected_flats'
+    bpdates = (breakpoints.loc[flat_bin-1, 'DATE-OBS'], breakpoints.loc[flat_bin, 'DATE-OBS'])
+    calib_flat_subdir = calib_flat_dir / f'{wave:.0f}nm_{bpdates[0]}_{bpdates[1]}'
 
-    try:
-        t1 = breakpoints[superflat_index-1]
-        t2 = breakpoints[superflat_index]
-    except IndexError:
-        return False
+    flat_list = calib_flat_subdir.glob('*.fits')
+    flat_list = [f'{item} FLAT_{setting.upper()}\n' for item in flat_list][:10]
 
-    t1_human = Time(t1, format='mjd').iso.split(' ')[0]
-    t2_human = Time(t2, format='mjd').iso.split(' ')[0]
-
-    if time_dependent_flats:
-        superflat_name = f'{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}'
-        superflat_name_l = f'{wave_setting:.0f}nm_{setting}l_{t1_human}_{t2_human}'
-        superflat_name_u = f'{wave_setting:.0f}nm_{setting}u_{t1_human}_{t2_human}'
-        superflat_dir = paths.edr5_dir / 'superflats' / 'data'
-    else:
-        superflat_name = f'{wave_setting:.0f}nm_{setting}_2016-04-22_2018-12-03'
-        superflat_name_l = f'{wave_setting:.0f}nm_{setting}l_2016-04-22_2018-12-03'
-        superflat_name_u = f'{wave_setting:.0f}nm_{setting}u_2016-04-22_2018-12-03'
-        superflat_dir = paths.edr5_dir / 'superflats' / 'data'
-    
-
-    if setting == 'blue':
-        super_flat_file_l = superflat_dir / f'superflat_{superflat_name}.fits'
-        super_flat_bkg_file_l = superflat_dir / f'superflat_bkg_{superflat_name}.fits'
-        super_flat_file_u = super_flat_file_l
-        super_flat_bkg_file_u = super_flat_bkg_file_l
-    elif setting == 'red':
-        super_flat_file_l = superflat_dir / f'superflat_{superflat_name_l}.fits'
-        super_flat_bkg_file_l = superflat_dir / f'superflat_bkg_{superflat_name_l}.fits'
-        super_flat_file_u = superflat_dir / f'superflat_{superflat_name_u}.fits'
-        super_flat_bkg_file_u = superflat_dir / f'superflat_bkg_{superflat_name_u}.fits'
-    else:
-        raise ValueError('Wrong wavelength setting!')
     with open(sof_file, 'r') as f:
         lines = f.readlines()
 
-    for i, line in enumerate(lines):
-        if 'MASTER_FLAT_BLUE' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_flat_file_l} {line_end}'
-        elif 'BKG_FLAT_' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_flat_bkg_file_l} {line_end}'
-        if 'MASTER_FLAT_REDL' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_flat_file_l} {line_end}'
-        elif 'BKG_FLAT_REDL' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_flat_bkg_file_l} {line_end}'
-        elif 'MASTER_FLAT_REDU' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_flat_file_u} {line_end}'
-        elif 'BKG_FLAT_REDU' in line:
-            line_end = line.split(' ')[-1]
-            lines[i] = f'{super_flat_bkg_file_u} {line_end}'
+    lines = [item for item in lines if 'FLAT_' not in item]
+
+    lines = flat_list + lines
 
     new_sof_file = str(sof_file).replace('input.sof', 'input_edibles.sof')
     with open(new_sof_file, 'w') as f:
@@ -196,14 +146,17 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
     # obs_list = obs_list.loc[(obs_list['MJD-OBS'] > 57352) & (obs_list['MJD-OBS'] < 57777)]
-    # obs_list = obs_list.iloc[6:7]
+    obs_list = obs_list.iloc[:1]
     edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
     output_dir = paths.edr5_dir / 'extracted_added_average'
     cleanup = True
     breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:, 'MJD'].values
 
     # Make / update database of objects in EDPS directory with OBJECT names and TPL START
-    edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
+    # edps_obs_df = edr5_functions.make_reduction_database(edps_object_dir)
+    edps_obs_df = pd.read_pickle(files('edibles_dr5') / 'tmp' / 'edps_obs_list.pkl')
+
+    reduced_superflats = []
     
     for _, row in obs_list.iterrows():  # Iterate through all OB's
         print('Row', row)
@@ -249,7 +202,20 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
             # Modify inpuf.sof file to use super flats (and super bias)
             fxb_file = sub_dir / parse_xfb_name(wave_maps[0])
             sof_file = sub_dir / 'input.sof'
-            flat_found = modify_sof(sof_file, wave_maps[0], fxb_file, row['MJD-OBS'], breakpoints)
+
+            with open(sof_file, 'r') as f:
+                lines = f.readlines()
+
+            for i, line in enumerate(lines):
+                if 'MASTER_FLAT_' in line:
+                    flat_dir = Path(line.split(' ')[0]).parent
+
+            mflat_sof_file = flat_dir / 'input.sof'
+            breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_4.csv'
+            breakpoints = pd.read_csv(breakpoint_file, index_col=0)
+
+            modify_sof(mflat_sof_file, wave_maps[0], fxb_file, row['MJD-OBS'], breakpoints)
+
 
             # Make backup of wave map
             for wm_file in wave_maps:
@@ -258,6 +224,17 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                         os.system(f'cp {wm_file} {str(wm_file).replace(".fits", "_bac.fits")}')
             
             crop_limits = merge_delt_dict[wave_setting]
+
+            # Run esorex on input_edibles.sof of masterflat
+            if mflat_sof_file not in reduced_superflats:
+                os.system(f'/usr/bin/nice {paths.esorex_path} '
+                        '--suppress-prefix=true '
+                        f'--recipe-dir={paths.recipe_dir} '
+                        f'--output-dir={flat_dir} '
+                        f'uves_cal_mflat '
+                        f'{flat_dir / "input_edibles.sof"}')
+
+            reduced_superflats.append(mflat_sof_file)
 
             # Run esorex on input_edibles.sof
             # flatfield pixel per pixel
@@ -268,8 +245,7 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                     f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
                     f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
                     '--reduce.extract.method="average" '
-                    # '--reduce.skysub="false" '
-                    f'{sub_dir / "input_edibles.sof"}')
+                    f'{sub_dir / "input.sof"}')
 
             # Extract reductions which were made with super flats
             for wm_file in wave_maps:
@@ -385,4 +361,5 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
 
 
 if __name__ == '__main__':
-    main(output_dir_online=Path('/home/alex/spectra/EDR5/orders'))
+    # main(output_dir_online=Path('/home/alex/spectra/EDR5/orders'))
+    main(output_dir_online=Path('/home/alex/diss_dibs/edibles_reduction/average_direct_sf'))
