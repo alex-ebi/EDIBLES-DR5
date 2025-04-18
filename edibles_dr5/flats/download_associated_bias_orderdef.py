@@ -51,19 +51,19 @@ def main(flat_dir):
             continue
 
         # Download nightlog
-        night_log_file = Path(str(file).replace('.fits', '.NL.txt'))
+        # night_log_file = Path(str(file).replace('.fits', '.NL.txt'))
 
-        if not night_log_file.is_file():
-            dp_id = file.name.replace('.fits', '.NL')
-            print(dp_id)
-            download_url = f'http://archive.eso.org/datalink/links?ID=ivo://eso.org/ID?{dp_id}&eso_download=file'
-            print(f'Retrieving file {dp_id}')
-            try:
-                urllib.request.urlretrieve(download_url, filename=flat_dir / (dp_id + '.txt'))
-            except urllib.error.HTTPError:
-                print(f'File {flat_dir / (dp_id + ".txt")} not found')
-                os.system(f'rm {file}')
-            print(f'File {flat_dir / (dp_id + ".txt")} downloaded')
+        # if not night_log_file.is_file():
+        #     dp_id = file.name.replace('.fits', '.NL')
+        #     print(dp_id)
+        #     download_url = f'http://archive.eso.org/datalink/links?ID=ivo://eso.org/ID?{dp_id}&eso_download=file'
+        #     print(f'Retrieving file {dp_id}')
+        #     try:
+        #         urllib.request.urlretrieve(download_url, filename=flat_dir / (dp_id + '.txt'))
+        #     except urllib.error.HTTPError:
+        #         print(f'File {flat_dir / (dp_id + ".txt")} not found')
+        #         os.system(f'rm {file}')
+        #     print(f'File {flat_dir / (dp_id + ".txt")} downloaded')
 
 
         night_log_file = Path(str(file).replace('.fits', '.NL.txt'))
@@ -84,7 +84,11 @@ def main(flat_dir):
                         dp_id = bias_archive_name.replace('.fits', '')
                         download_url = f'http://archive.eso.org/datalink/links?ID=ivo://eso.org/ID?{dp_id}&eso_download=file'
                         print(f'Retrieving file {bias_archive_name}.fits')
-                        urllib.request.urlretrieve(download_url, filename=flat_dir / (bias_archive_name + '.fits.Z'))
+                        print(download_url)
+                        try:
+                            urllib.request.urlretrieve(download_url, filename=flat_dir / (bias_archive_name + '.fits.Z'))
+                        except urllib.error.HTTPError:
+                            pass
                         print(f'File {bias_archive_name}.fits downloaded')
                         os.system(f'uncompress {flat_dir / (bias_archive_name + ".fits.Z")}')
                 if line.startswith('UVES_DIC') and '_ORDDEF' in line and not binning:  # Orderdef
@@ -97,8 +101,11 @@ def main(flat_dir):
                             dp_id = orderdef_archive_name.replace('.fits', '')
                             download_url = f'http://archive.eso.org/datalink/links?ID=ivo://eso.org/ID?{dp_id}&eso_download=file'
                             print(f'Retrieving file {orderdef_archive_name}.fits')
-                            urllib.request.urlretrieve(download_url,
-                                                       filename=flat_dir / (orderdef_archive_name + '.fits.Z'))
+                            try:
+                                urllib.request.urlretrieve(download_url,
+                                                        filename=flat_dir / (orderdef_archive_name + '.fits.Z'))
+                            except urllib.error.HTTPError:
+                                pass
                             print(f'File {orderdef_archive_name}.fits downloaded')
                             os.system(f'uncompress {flat_dir / (orderdef_archive_name + ".fits.Z")}')
                 if line.startswith('UVES_DIC') and '_FMTCHK' in line and not binning:  # FMTCHK
@@ -111,8 +118,12 @@ def main(flat_dir):
                             dp_id = fmtchk_archive_name.replace('.fits', '')
                             download_url = f'http://archive.eso.org/datalink/links?ID=ivo://eso.org/ID?{dp_id}&eso_download=file'
                             print(f'Retrieving file {fmtchk_archive_name}.fits')
-                            urllib.request.urlretrieve(download_url,
-                                                       filename=flat_dir / (fmtchk_archive_name + '.fits.Z'))
+                            try:
+                                urllib.request.urlretrieve(download_url,
+                                                        filename=flat_dir / (fmtchk_archive_name + '.fits.Z'))
+                            except urllib.error.HTTPError:
+                                pass
+
                             print(f'File {fmtchk_archive_name}.fits downloaded')
                             os.system(f'uncompress {flat_dir / (fmtchk_archive_name + ".fits.Z")}')
 
