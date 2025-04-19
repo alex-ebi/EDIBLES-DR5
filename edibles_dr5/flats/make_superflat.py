@@ -157,7 +157,8 @@ def main():
             save_fits_image(super_flat_dir / 'data' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', hdr, super_flat_bkg)
 
             # Add information about superflat to superflat DataFrame
-            s = pd.Series(data=[f'superflat_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', flat_list_len, t1_human, t2_human], index=['file_name', 'n_masterflats', 'start_date', 'end_date'])
+            s = pd.Series(data=[f'superflat_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', flat_list_len, t1_human, t2_human, wave_setting], 
+                          index=['file_name', 'n_masterflats', 'start_date', 'end_date', 'wave'])
             superflat_df = pd.concat((superflat_df, s), ignore_index=True, axis=1)
         
     superflat_df.T.to_csv(files('edibles_dr5') / 'supporting_data/superflat_list.csv')
