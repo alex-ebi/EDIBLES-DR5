@@ -12,7 +12,7 @@ from importlib.resources import files
 import pandas as pd
 
 
-breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_4.csv'
+breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints.csv'
 breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:,'MJD'].values
 
 
@@ -63,7 +63,7 @@ def main():
                         this_wave_setting = hdr['ESO INS GRAT1 WLEN']
                     except KeyError:
                         this_wave_setting = hdr['ESO INS GRAT2 WLEN']
-                    if this_wave_setting == wave_setting and t1 < mjd_obs < t2:
+                    if this_wave_setting == wave_setting and t1 < mjd_obs < t2 and hdr['ESO DET WIN1 BINX'] == 1:
                         flat_list.append(data)
                         file_list.append(file)
                         print(len(flat_list), 'master flats -', 'Memory:', process.memory_info().rss / 1e9, 'GB')  # in bytes
@@ -72,6 +72,7 @@ def main():
                 flat_list = np.array(flat_list)
             except ValueError:
                 print(flat_list)
+
             super_flat = np.mean(flat_list, axis=0)
             print(super_flat.shape)
             print("Length flat list: ", len(flat_list))

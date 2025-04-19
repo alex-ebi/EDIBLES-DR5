@@ -8,7 +8,7 @@ from importlib.resources import files
 
 file_dir = files('edibles_dr5') / 'supporting_data'
 
-breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_4.csv'
+breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints.csv'
 breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:,'MJD'].values
 
 # Files listing the complete flats over the time frame from 2014.01.01 to 2019.12.31.

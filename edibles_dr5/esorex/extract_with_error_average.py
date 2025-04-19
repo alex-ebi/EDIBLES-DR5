@@ -192,7 +192,7 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, breakpoin
 # Dictionary of Merge_delt for order merging, dependent on setting wavelength. Units are in Angstrom.
 merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
 
-def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints_4.csv'):
+def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints.csv'):
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
     # obs_list = obs_list.loc[(obs_list['MJD-OBS'] > 57352) & (obs_list['MJD-OBS'] < 57777)]
