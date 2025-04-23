@@ -102,8 +102,7 @@ def main(flat_dir):
                             download_url = f'http://archive.eso.org/datalink/links?ID=ivo://eso.org/ID?{dp_id}&eso_download=file'
                             print(f'Retrieving file {orderdef_archive_name}.fits')
                             try:
-                                urllib.request.urlretrieve(download_url,
-                                                        filename=flat_dir / (orderdef_archive_name + '.fits.Z'))
+                                urllib.request.urlretrieve(download_url, filename=flat_dir / (orderdef_archive_name + '.fits.Z'))
                             except urllib.error.HTTPError:
                                 pass
                             print(f'File {orderdef_archive_name}.fits downloaded')
@@ -119,8 +118,7 @@ def main(flat_dir):
                             download_url = f'http://archive.eso.org/datalink/links?ID=ivo://eso.org/ID?{dp_id}&eso_download=file'
                             print(f'Retrieving file {fmtchk_archive_name}.fits')
                             try:
-                                urllib.request.urlretrieve(download_url,
-                                                        filename=flat_dir / (fmtchk_archive_name + '.fits.Z'))
+                                urllib.request.urlretrieve(download_url, filename=flat_dir / (fmtchk_archive_name + '.fits.Z'))
                             except urllib.error.HTTPError:
                                 pass
 
@@ -130,4 +128,5 @@ def main(flat_dir):
 
 if __name__ == '__main__':
     print(paths.edr5_dir / 'calib_raw')
-    main(paths.edr5_dir / 'calib_raw')
+    # main(paths.edr5_dir / 'calib_raw')
+    main(paths.edr5_dir / 'calib_raw_tmp')

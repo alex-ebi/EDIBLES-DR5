@@ -15,6 +15,11 @@ import pandas as pd
 breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints.csv'
 breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:,'MJD'].values
 
+# bin = 7
+# breakpoints = breakpoints[bin-1: bin+1]
+
+print(breakpoints)
+
 
 def save_fits_image(file, header, data):
     primary_hdu = fits.PrimaryHDU(data=data, header=header)
@@ -28,19 +33,22 @@ def shrink(data):
 def main():
     process = psutil.Process()
     setting_list = [
-        [860.0, 'redu'], [860.0, 'redl'], [346.0, 'blue'], [437.0, 'blue'], 
+        [346.0, 'blue'], [437.0, 'blue'],
         [564.0, 'redl'], [564.0, 'redu'],
-                    ]
+        [860.0, 'redu'], [860.0, 'redl'],
+        ]
     
     superflat_df = pd.DataFrame()
 
-    for t1, t2 in zip(breakpoints[:-1], breakpoints[1:]):
+    for time_bin, (t1, t2) in enumerate(zip(breakpoints[:-1], breakpoints[1:])):
         print(t1, t2)
+        time_bin = time_bin + 1
         t1_human = Time(t1, format='mjd').iso.split(' ')[0]
         t2_human = Time(t2, format='mjd').iso.split(' ')[0]
         print(t1_human)
 
         for wave_setting, setting in setting_list:
+            n_exp = 0
             print('Setting:', setting, wave_setting)
             flat_name = f'masterflat_{setting}.fits'
             flat_name = f'LAMP,FLAT_MASTER_FLAT_{setting.upper()}.fits'
@@ -49,7 +57,13 @@ def main():
             file_dir = edr5_dir / 'masterflats'
 
             file_list_start = list(file_dir.rglob(f'*{flat_name}'))
-            # print('File list', file_list)
+
+            # delete duplicates from multiple reductions of the same dataset
+            file_df = pd.DataFrame(data=[file_list_start, [item.parent.name for item in file_list_start]], index=['path', 'sub_dir']).T
+            file_df = file_df.drop_duplicates(subset='sub_dir')
+
+            file_list=file_df.loc[:,'path'].values
+
             flat_list = []
             file_list = []
 
@@ -66,6 +80,7 @@ def main():
                     if this_wave_setting == wave_setting and t1 < mjd_obs < t2 and hdr['ESO DET WIN1 BINX'] == 1:
                         flat_list.append(data)
                         file_list.append(file)
+                        n_exp += hdr['ESO TPL NEXP']
                         print(len(flat_list), 'master flats -', 'Memory:', process.memory_info().rss / 1e9, 'GB')  # in bytes
 
             try:
@@ -106,8 +121,11 @@ def main():
             plt.close()
 
             # add file names of used flats to header
+            file_list = sorted(file_list)
             for i, file_name in enumerate(file_list):
                 hdr.append((f'MASTERFLAT_{i}', file_name.parent.parent.name))
+
+            hdr.append(('NEXP TOTAL', n_exp, 'Number of raw flat frames'))
 
             save_fits_image(super_flat_dir / 'data' / f'superflat_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', hdr, super_flat)
 
@@ -151,17 +169,21 @@ def main():
             plt.close()
 
             # add file names of used flats to header
+            bkg_file_list = sorted(bkg_file_list)
             for i, file_name in enumerate(bkg_file_list):
                 hdr.append((f'MASTERBKG_{i}', Path(file_name).parent.parent.name))
+
+            hdr.append(('NEXP TOTAL', n_exp, 'Number of raw flat frames'))
 
             save_fits_image(super_flat_dir / 'data' / f'superflat_bkg_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', hdr, super_flat_bkg)
 
             # Add information about superflat to superflat DataFrame
-            s = pd.Series(data=[f'superflat_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', flat_list_len, t1_human, t2_human, wave_setting], 
-                          index=['file_name', 'n_masterflats', 'start_date', 'end_date', 'wave'])
+            s = pd.Series(data=[f'superflat_{wave_setting:.0f}nm_{setting}_{t1_human}_{t2_human}.fits', flat_list_len, t1_human, t2_human, wave_setting, time_bin, n_exp], 
+                          index=['file_name', 'n_masterflats', 'start_date', 'end_date', 'wave', 'time_bin', 'NEXP TOTAL'])
             superflat_df = pd.concat((superflat_df, s), ignore_index=True, axis=1)
-        
-    superflat_df.T.to_csv(files('edibles_dr5') / 'supporting_data/superflat_list.csv')
+    
+    superflat_df = superflat_df.T.sort_values(by=['start_date', 'wave'])
+    superflat_df.to_csv(files('edibles_dr5') / 'supporting_data/superflat_list.csv')
 
 
 if __name__ == '__main__':
