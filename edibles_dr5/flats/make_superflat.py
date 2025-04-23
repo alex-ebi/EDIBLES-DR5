@@ -59,10 +59,13 @@ def main():
             file_list_start = list(file_dir.rglob(f'*{flat_name}'))
 
             # delete duplicates from multiple reductions of the same dataset
-            file_df = pd.DataFrame(data=[file_list_start, [item.parent.name for item in file_list_start]], index=['path', 'sub_dir']).T
+            file_df = pd.DataFrame(data=[file_list_start, [item.parent.parent.name for item in file_list_start]], index=['path', 'sub_dir']).T
+            print('dropping duplicates')
+            print(file_df)
             file_df = file_df.drop_duplicates(subset='sub_dir')
+            print(file_df['sub_dir'])
 
-            file_list=file_df.loc[:,'path'].values
+            file_list_start=file_df.loc[:,'path'].values
 
             flat_list = []
             file_list = []
