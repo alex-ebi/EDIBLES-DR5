@@ -15,3 +15,11 @@ edps_dir = Path('/home/alex/PycharmProjects/edps')
 esorex_path = Path('/home/alex/programs/esoreflex/install/bin/esorex')
 
 recipe_dir = Path('/home/alex/programs/esoreflex/install/lib/esopipes-plugins/uves-6.4.6')
+
+# Paths to comparison spectra
+
+# Directory containing the EDIBLES DR4 spectra
+dr4_dir = Path('/home/alex/spectra/EDIBLES/orders')
+
+# Directory containing the EDIBLES DR5 spectra
+edr5_orders_dir = Path('/home/alex/spectra/EDR5/orders')

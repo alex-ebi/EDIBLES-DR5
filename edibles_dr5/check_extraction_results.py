@@ -9,10 +9,10 @@ from importlib.resources import files
 plot_method = 'linear'
 
 # Directory containing the EDIBLES DR4 spectra
-dr4_dir = Path('/home/alex/spectra/EDIBLES/orders')
+dr4_dir = paths.dr4_dir
 
 # Directory containing the EDIBLES DR5 spectra
-edr5_dir = Path('/home/alex/spectra/EDR5/orders')
+edr5_dir = paths.edr5_orders_dir
 
 # Directory containing ESO spectra from the science archive
 eso_dir = paths.edr5_dir / 'science_archive'
@@ -41,6 +41,33 @@ obs_list = pd.read_csv(files('edibles_dr5') / 'supporting_data/obs_names.csv', i
 
 print(obs_list)
 
+def crop_spectrum(array_in: np.array, x_min: float, x_max: float) -> np.array:
+    """
+    Returns a spectrum interval for x_min < wave < x_max.
+
+    Parameters
+    ----------
+    array_in : np.array([wave, flux, additional_columns])
+        Input spectrum.
+    x_min : float
+        Minimum wave coordinate of slice.
+    x_max : float
+        Maximum wave coordinate of slice.
+
+    Returns
+    -------
+    np.array([wave, flux, additional_columns])
+        Spectrum slice
+    """
+    if x_min > x_max:
+        raise ValueError('Slice_spectrum error: x_min is larger than x_max!')
+
+    b1 = array_in[0] < x_max  # boolean array of wave values smaller than x_max
+    b2 = x_min < array_in[0]  # boolean array of wave values larger than x_min
+    bool_array = np.logical_and(b1, b2)  # boolean array of wave values larger than x_min and smaller than x_max
+
+    return array_in[:, bool_array]
+
 
 def plot_product(spec_dir, star_name, obs_date, plt_color, use_mask=False):
     spec_list = list(spec_dir.rglob('*.fits'))
@@ -63,11 +90,13 @@ def plot_product(spec_dir, star_name, obs_date, plt_color, use_mask=False):
 
         cl_ang = setting_dependent_crop(spec, wave)
         
-        cropped_spec = spec
+        cropped_spec = crop_spectrum(spec, cl_ang[0], cl_ang[1])
 
         if plot_method == 'step':
-            plt.step(spec[0], spec[1] / np.median(spec[1]), where='mid', color=plt_color)
+            plt.step(spec[0], spec[1] / np.median(spec[1]), where='mid', color=plt_color, alpha=0.3)
+            plt.step(cropped_spec[0], cropped_spec[1] / np.median(spec[1]), where='mid', color=plt_color)
         else:
+            plt.plot(spec[0], spec[1] / np.median(spec[1]), color=plt_color, alpha=0.3)
             plt.plot(cropped_spec[0], cropped_spec[1] / np.median(spec[1]), color=plt_color)
 
     return True
@@ -164,6 +193,7 @@ def main():
         # DR4 spectra
         file_list = list(dr4_dir.rglob('*.fits'))
         file_list = [item for item in file_list if item.match(f'*{star_name}*')]
+        print("".join(obs_date[:10].split('-')))
 
         file_list = [item for item in file_list if item.match(f'*{"".join(obs_date[:10].split('-'))}*')]
 
