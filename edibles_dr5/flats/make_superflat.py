@@ -15,10 +15,10 @@ import pandas as pd
 breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints.csv'
 breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:,'MJD'].values
 
-bin = 7
-breakpoints = breakpoints[bin-1: bin+1]
+# bin = 7
+# breakpoints = breakpoints[bin-1: bin+1]
 
-print(breakpoints)
+# print(breakpoints)
 
 
 def save_fits_image(file, header, data):
