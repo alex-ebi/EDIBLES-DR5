@@ -276,8 +276,8 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                 xfb_name = parse_xfb_name(wm_file).replace('.fits', '_2.fits')
                 fxb_file = sub_dir / xfb_name
                 fxb_err_file = sub_dir / ('err' + xfb_name)
-                sky_file = sub_dir / xfb_name.replace('xfb_', 'xfsky_')
                 flat_file = sub_dir / xfb_name.replace('xfb_', 'xmf_')
+                resampled_file = xfb_name.replace('xfb_', 'resampled_science_').replace('_2.fits', '.fits')
 
                 # Read wavelength map
                 print('Reading wave map', wm_file)
@@ -298,7 +298,6 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                 with fits.open(fxb_err_file) as f:
                     errfxb = f[0].data
 
-                resampled_file = xfb_name.replace('xfb_', 'resampled_science_')
                 
                 # Open resampled sceince file
                 with fits.open(resampled_file) as f:
