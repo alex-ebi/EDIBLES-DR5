@@ -298,9 +298,16 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                 with fits.open(fxb_err_file) as f:
                     errfxb = f[0].data
 
-                # # Open Sky file
-                # with fits.open(sky_file) as f:
-                #     xfsky = f[0].data
+                resampled_file = xfb_name.replace('xfb_', 'resampled_science_')
+                
+                # Open resampled sceince file
+                with fits.open(resampled_file) as f:
+                    hdr_sci = f[0].header
+
+                # Add header information of resmapled file to header
+                for key, item in hdr_sci.items():
+                    if key not in list(xfb_hdr.keys()):
+                        xfb_hdr[key] = (item, hdr_sci.comments[key])
 
                 # Open extracted flat file
                 with fits.open(flat_file) as f:
