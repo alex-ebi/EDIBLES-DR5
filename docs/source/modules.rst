@@ -5,30 +5,29 @@ Modules
 .. autosummary::
    :toctree:
 
-Alignment
----------
+check_extraction_results
+------------------------
 .. automodule:: edibles_dr5.check_extraction_results
     :members:
 
-Convolve
---------
+cleanup_edps
+------------
 .. automodule:: edibles_dr5.cleanup_edps
     :members:
 
 edr5_functions
----
+--------------
 .. automodule:: edibles_dr5.edr5_functions
     :members:
 
 get_best_reductions
------
+-------------------
 .. automodule:: edibles_dr5.get_best_reductions
     :members:
-    .. :exclude-members: multi_row_exception, mask_as_nan, filter_wave
 
 
 get_observation_list
-----------
+--------------------
 .. automodule:: edibles_dr5.get_observation_list
     :members:
 
@@ -38,7 +37,7 @@ io
     :members:
 
 list_flats
--------
+----------
 .. automodule:: edibles_dr5.list_flats
     :members:
 
@@ -53,6 +52,6 @@ plot_formatchecks
     :members:
 
 transformations
-----
+---------------
 .. automodule:: edibles_dr5.transformations
     :members:

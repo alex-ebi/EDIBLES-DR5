@@ -3,7 +3,7 @@ Choosing the best reductions based on the FWHM relative to the slit width.
 """
 
 from astropy.io import fits
-import paths
+from edibles_dr5 import paths
 from importlib.resources import files
 import pandas as pd
 import os

@@ -5,6 +5,6 @@ exclude =
     build,
     dist,
     versioneer.py,
-    edibles-dr5/_version.py,
+    edibles_dr5/_version.py,
     docs/source/conf.py
 max-line-length = 120
