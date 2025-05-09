@@ -13,7 +13,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://git.uibk.ac.at/csap5791/astro_scripts_uibk/issues.
+Report bugs at https://github.com/alex-ebi/EDIBLES-DR5/issues.
 
 If you are reporting a bug, please include:
 
@@ -35,14 +35,14 @@ is open to whoever wants to implement it.
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-astro_scripts_uibk could always use more documentation, whether
-as part of the official astro_scripts_uibk docs, in docstrings,
+EDIBLES-DR5 could always use more documentation, whether
+as part of the official EDIBLES-DR5 docs, in docstrings,
 or even on the web in blog posts, articles, and such.
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://git.uibk.ac.at/csap5791/astro_scripts_uibk/issues.
+The best way to send feedback is to file an issue at https://github.com/alex-ebi/EDIBLES-DR5/issues.
 
 If you are proposing a feature:
 
@@ -71,17 +71,17 @@ Rules for developing
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `astro_scripts_uibk` for local development.
+Ready to contribute? Here's how to set up `EDIBLES-DR5` for local development.
 
-1. Fork the `astro_scripts_uibk` repo on GitLab.
+1. Fork the `EDIBLES-DR5` repo on GitLab.
 2. Clone your fork locally::
 
-    git clone https://git.uibk.ac.at/your_name_here/astro_scripts_uibk.git
+    git clone https://github.com/alex-ebi/EDIBLES-DR5.git
 
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
-    mkvirtualenv astro_scripts_uibk
-    cd astro_scripts_uibk/
+    mkvirtualenv EDIBLES-DR5
+    cd EDIBLES-DR5/
     python3 -m pip install -e .
     python3 -m pip install --upgrade -r requirements-dev.txt
 
@@ -93,7 +93,7 @@ Ready to contribute? Here's how to set up `astro_scripts_uibk` for local develop
 
 5. When you're done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox::
 
-    flake8 astro_scripts_uibk
+    flake8 edibles_dr5
     coverage run -m pytest
 
    To get flake8, just pip install it into your virtualenv.

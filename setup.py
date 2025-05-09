@@ -10,7 +10,7 @@ min_version = (3, 10)
 sys_version = sys.version_info[:2]
 if sys.version_info < min_version:
     error = f"""
-astro_scripts_uibk does not support Python {sys_version[0]}.{sys_version[1]}.
+EDIBLES-DR5 does not support Python {sys_version[0]}.{sys_version[1]}.
 Python {min_version[0]}.{min_version[1]} and above is required. Check your Python version like so:
 
 python3 -V

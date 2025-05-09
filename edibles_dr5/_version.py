@@ -43,7 +43,7 @@ def get_config():
     cfg.style = "pep440-post"
     cfg.tag_prefix = "v"
     cfg.parentdir_prefix = "None"
-    cfg.versionfile_source = "astro_scripts_uibk/_version.py"
+    cfg.versionfile_source = "edibles_dr5/_version.py"
     cfg.verbose = False
     return cfg
 

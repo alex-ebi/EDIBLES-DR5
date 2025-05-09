@@ -37,7 +37,7 @@ jobs:
           command: coverage run -m pytest && coverage report -m
       - run:
           name: Run flake8
-          command: flake8 -v astro_scripts_uibk/
+          command: flake8 -v edibles_dr5/
 
   docs-build: # Building the documentation
     docker:

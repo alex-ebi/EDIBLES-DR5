@@ -7,53 +7,52 @@ Modules
 
 Alignment
 ---------
-.. automodule:: astro_scripts_uibk.alignment
+.. automodule:: edibles_dr5.check_extraction_results
     :members:
 
 Convolve
 --------
-.. automodule:: astro_scripts_uibk.convolve
+.. automodule:: edibles_dr5.cleanup_edps
     :members:
 
-I/O
+edr5_functions
 ---
-.. automodule:: astro_scripts_uibk.io_asu
+.. automodule:: edibles_dr5.edr5_functions
     :members:
 
-Query
+get_best_reductions
 -----
-.. automodule:: astro_scripts_uibk.query
+.. automodule:: edibles_dr5.get_best_reductions
     :members:
-    :exclude-members: multi_row_exception, mask_as_nan, filter_wave
+    .. :exclude-members: multi_row_exception, mask_as_nan, filter_wave
 
 
-Photometry
+get_observation_list
 ----------
-.. automodule:: astro_scripts_uibk.photometry
+.. automodule:: edibles_dr5.get_observation_list
     :members:
-    :exclude-members: my_integral
 
-Spectrum reduction
+io
 ------------------
-.. automodule:: astro_scripts_uibk.spectrum_reduction
+.. automodule:: edibles_dr5.io
     :members:
 
-Widgets
+list_flats
 -------
-.. automodule:: astro_scripts_uibk.widgets
+.. automodule:: edibles_dr5.list_flats
     :members:
 
-Transformations
+paths
 ---------------
-.. automodule:: astro_scripts_uibk.transformations
+.. automodule:: edibles_dr5.paths
     :members:
 
-Publication Plots
+plot_formatchecks
 -----------------
-.. automodule:: astro_scripts_uibk.pub_plot
+.. automodule:: edibles_dr5.plot_formatchecks
     :members:
 
-Spas
+transformations
 ----
-.. automodule:: astro_scripts_uibk.spas
+.. automodule:: edibles_dr5.transformations
     :members:

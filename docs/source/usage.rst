@@ -2,9 +2,9 @@
 Usage
 =====
 
-Start by importing astro_scripts_uibk.
+Start by importing edibles_dr5.
 
 .. code-block:: python
 
-    import astro_scripts_uibk
+    import edibles_dr5
 
