@@ -193,9 +193,9 @@ def main():
         # DR4 spectra
         file_list = list(dr4_dir.rglob('*.fits'))
         file_list = [item for item in file_list if item.match(f'*{star_name}*')]
-        print("".join(obs_date[:10].split('-')))
+        print("".join(str(obs_date)[:10].split('-')))
 
-        file_list = [item for item in file_list if item.match(f'*{"".join(obs_date[:10].split('-'))}*')]
+        file_list = [item for item in file_list if item.match(f'*{"".join(str(obs_date)[:10].split('-'))}*')]
 
         for edibles_file in file_list:
             edibles_spec = read_uves(edibles_file)
