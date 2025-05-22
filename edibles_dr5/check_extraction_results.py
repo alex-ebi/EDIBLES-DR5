@@ -76,7 +76,6 @@ def plot_product(spec_dir, star_name, obs_date, plt_color, use_mask=False):
     if isinstance(obs_date, str):
         temp_list = [item for item in spec_list if obs_date in item.name] # checks if obs_date is in the filename
         if len(temp_list) == 0:
-            print("0 spectra found for this date")
             obs_date = obs_date.replace(':', '_') # needed for Windows file naming compatibility
             spec_list = [item for item in spec_list if obs_date in item.name]
         else:
