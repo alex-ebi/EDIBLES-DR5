@@ -74,7 +74,12 @@ def plot_product(spec_dir, star_name, obs_date, plt_color, use_mask=False):
     spec_list = [item for item in spec_list if star_name in item.name]
 
     if isinstance(obs_date, str):
-        spec_list = [item for item in spec_list if obs_date in item.name]
+        temp_list = [item for item in spec_list if obs_date in item.name] # checks if obs_date is in the filename
+        if len(temp_list) == 0:
+            obs_date = obs_date.replace(':', '_') # needed for Windows file naming compatibility
+            spec_list = [item for item in spec_list if obs_date in item.name]
+        else:
+            spec_list = [item for item in spec_list if obs_date in item.name] # the original obs_date check -- for linux systems
 
     if len(spec_list) == 0:
         return False
