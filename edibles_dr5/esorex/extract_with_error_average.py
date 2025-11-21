@@ -335,8 +335,11 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                     file_name = f'{star_name}_{obs_time}_{wave_setting:.0f}nm_{name_end}'
                     spec = np.array([w, f, err, xmf_col])
 
+                    order_header = np.copy(xfb_hdr)
+                    order_header.append(('EDIBLES_ORDER', order, 'Order number in EDIBLES reduction.'))
+
                     # Add spectrum information to list
-                    spec_list.append([file_name, spec, xfb_hdr])
+                    spec_list.append([file_name, spec, order_header])
                     # Add file name to set of file names, so we have no duplicates
                     file_set.add(file_name)
             if cleanup:
@@ -347,7 +350,6 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
             print(file_name)
             flux_cols = []
             err_cols = []
-            # sky_cols = []
             xmf_cols = []
             for iter_name, spec, xfb_hdr in spec_list:
                 if iter_name == file_name:
