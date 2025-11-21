@@ -100,7 +100,6 @@ if [ -n "$list" ]; then
 else
     xargs $xargsopts wget $download_opts 
 fi <<'__EOF__'
-https://archive.eso.org/downloadportalapi/readme/77c57f3c-f74d-4c04-b980-e2b87b34828a
 https://dataportal.eso.org/dataportal_new/file/UVES.2015-12-22T10:14:03.007.NL
 https://dataportal.eso.org/dataportal_new/file/UVES.2016-02-17T11:14:33.789.NL
 https://dataportal.eso.org/dataportal_new/file/UVES.2015-12-26T15:49:43.914.NL

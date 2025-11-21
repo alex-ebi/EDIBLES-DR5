@@ -25,6 +25,7 @@ def associate_filter_name(wave):
 
 def main(flat_dir):
     for file in flat_dir.glob('*.fits'):
+        print(file)
         with fits.open(file) as f:
             hdr = f[0].header
 
@@ -128,5 +129,5 @@ def main(flat_dir):
 
 if __name__ == '__main__':
     print(paths.edr5_dir / 'calib_raw')
-    # main(paths.edr5_dir / 'calib_raw')
-    main(paths.edr5_dir / 'calib_raw_tmp')
+    main(paths.edr5_dir / 'calib_raw')
+    # main(paths.edr5_dir / 'calib_raw_tmp')
