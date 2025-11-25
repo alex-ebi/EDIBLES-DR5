@@ -317,6 +317,8 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                 else:
                     wave_setting = xfb_hdr['ESO INS GRAT2 WLEN']
 
+                wave_setting = int(wave_setting)
+
                 star_name = xfb_hdr['ESO OBS TARG NAME'].replace(' ', '')
                 obs_time = xfb_hdr['ESO TPL START']
                 
@@ -334,6 +336,12 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                     name_end = fxb_file.name.replace("xfb_", "").replace(".fits", "_O").replace('_2_', '_') + f"{order}.fits"
                     file_name = f'{star_name}_{obs_time}_{wave_setting:.0f}nm_{name_end}'
                     spec = np.array([w, f, err, xmf_col])
+                    # Remove nan values
+                    spec = edr5_functions.remove_nan_spec(spec, 1)
+                    # crop ranges in angstrom
+                    cl_ang = edr5_functions.setting_dependent_crop(spec, wave_setting, merge_delt_dict)
+                    # crop spectrum
+                    spec = edr5_functions.crop_spectrum(spec, cl_ang[0], cl_ang[1])
 
                     order_header = np.copy(xfb_hdr)
                     order_header.append(('EDIBLES_ORDER', order, 'Order number in EDIBLES reduction.'))

@@ -12,6 +12,8 @@ def get_wave_path(hdr):
     except KeyError:
         wave = hdr['ESO INS GRAT2 WLEN']
 
+    wave = int(wave)
+
     setting = hdr['ESO INS PATH'].lower()
 
     return wave, setting
@@ -122,3 +124,60 @@ def cleanup_edps_subdir(sub_dir: Path) -> None:
     os.system(f'rm {rm_str}')
 
 
+def remove_nan_spec(spec: np.array, col: int) -> np.array:
+    """
+    Removes spectrum bin with nan values in column **col**.
+
+    Parameters
+    ----------
+    spec : np.array([wave, flux, additional columns])
+        Spectrum with nan values.
+    col : int
+        Index of column to be searched for nan values.
+
+    Returns
+    -------
+    np.array([wave, flux, additional columns])
+        Spectrum without nan values.
+    """
+    not_nan_ind = ~np.isnan(spec[col])
+    return spec.T[not_nan_ind].T
+
+
+def setting_dependent_crop(spec, wave, merge_delt_dict):
+    crop_limits = np.array(merge_delt_dict[wave])
+    cl_ang = [np.nanmin(spec[0]) + crop_limits[0], np.nanmax(spec[0]) - crop_limits[1]]
+
+    return cl_ang
+
+
+def crop_spectrum(array_in: np.array, x_min: float, x_max: float) -> np.array:
+    """
+    Returns a spectrum interval for x_min < wave < x_max.
+
+    Parameters
+    ----------
+    array_in : np.array([wave, flux, additional_columns])
+        Input spectrum.
+    x_min : float
+        Minimum wave coordinate of slice.
+    x_max : float
+        Maximum wave coordinate of slice.
+
+    Returns
+    -------
+    np.array([wave, flux, additional_columns])
+        Spectrum slice
+    """
+    if x_min > x_max:
+        raise ValueError('Slice_spectrum error: x_min is larger than x_max!')
+
+    b1 = array_in[0] < x_max  # boolean array of wave values smaller than x_max
+    b2 = x_min < array_in[0]  # boolean array of wave values larger than x_min
+    bool_array = np.logical_and(b1, b2)  # boolean array of wave values larger than x_min and smaller than x_max
+
+    return array_in[:, bool_array]
+
+
+if __name__ == '__main__':
+    cleanup_edps_subdir(Path('/home/Alex/EDPS_data/UVES'))
