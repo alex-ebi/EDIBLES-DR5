@@ -12,6 +12,7 @@ from edibles_dr5 import paths, edr5_functions
 from importlib.resources import files
 from astropy.time import Time
 import pandas as pd
+import copy
 
 
 def wave_from_map(wave_map):
@@ -197,8 +198,8 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
     obs_list = pd.read_csv(obs_list_path, index_col=0)
     # obs_list = obs_list.loc[(obs_list['MJD-OBS'] > 57352) & (obs_list['MJD-OBS'] < 57777)]
     # obs_list = obs_list.iloc[6:7]
-    edps_object_dir = paths.edr5_dir / 'EDPS/UVES/object'
-    output_dir = paths.edr5_dir / 'extracted_added_average'
+    edps_object_dir = Path('/run/media/Alex/PortableSSD/EDPS_data/UVES/object')
+    output_dir = Path('/home/Alex/spectra/EDR5/orders')
     cleanup = True
     breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:, 'MJD'].values
 
@@ -268,6 +269,7 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                     f'uves_obs_scired --debug=true --reduce.tiltcorr=true --reduce.ffmethod="pixel" '
                     f'--reduce.merge_delt1={float(crop_limits[0]):.0f} --reduce.merge_delt2={float(crop_limits[1]):.0f} '
                     '--reduce.extract.method="average" '
+                    # '--reduce.backsub.mmethod="min" '
                     # '--reduce.skysub="false" '
                     f'{sub_dir / "input_edibles.sof"}')
 
@@ -336,14 +338,8 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                     name_end = fxb_file.name.replace("xfb_", "").replace(".fits", "_O").replace('_2_', '_') + f"{order}.fits"
                     file_name = f'{star_name}_{obs_time}_{wave_setting:.0f}nm_{name_end}'
                     spec = np.array([w, f, err, xmf_col])
-                    # Remove nan values
-                    spec = edr5_functions.remove_nan_spec(spec, 1)
-                    # crop ranges in angstrom
-                    cl_ang = edr5_functions.setting_dependent_crop(spec, wave_setting, merge_delt_dict)
-                    # crop spectrum
-                    spec = edr5_functions.crop_spectrum(spec, cl_ang[0], cl_ang[1])
 
-                    order_header = np.copy(xfb_hdr)
+                    order_header = copy.copy(xfb_hdr)
                     order_header.append(('EDIBLES_ORDER', order, 'Order number in EDIBLES reduction.'))
 
                     # Add spectrum information to list
@@ -355,7 +351,6 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
 
         # Add spectra with same star name, setting, observation time and order
         for file_name in file_set:
-            print(file_name)
             flux_cols = []
             err_cols = []
             xmf_cols = []
@@ -377,12 +372,23 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
 
             add_error = np.sqrt(add_error)
 
+            spec = np.array([add_wave, add_flux, add_error, add_xmf])
+            # Remove nan values
+            spec = edr5_functions.remove_nan_spec(spec, 1)
+            
+            wave_setting, _ = edr5_functions.get_wave_path(my_hdr)
+
+            # crop ranges in angstrom
+            cl_ang = edr5_functions.setting_dependent_crop(spec, wave_setting, merge_delt_dict)
+            # crop spectrum
+            # spec = edr5_functions.crop_spectrum(spec, cl_ang[0], cl_ang[1])
+
             # Save file
             # Write data to file
-            columns = [fits.Column(name='WAVE', array=add_wave, format='D'),
-                    fits.Column(name='FLUX', array=add_flux, format='D'),
-                    fits.Column(name='ERROR', array=add_error, format='D'),
-                    fits.Column(name='FLAT', array=add_xmf, format='D')]
+            columns = [fits.Column(name='WAVE', array=spec[0], format='D'),
+                    fits.Column(name='FLUX', array=spec[1], format='D'),
+                    fits.Column(name='ERROR', array=spec[2], format='D'),
+                    fits.Column(name='FLAT', array=spec[3], format='D')]
 
             wl_hdu = fits.BinTableHDU.from_columns(columns)
 
@@ -401,4 +407,4 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
 
 
 if __name__ == '__main__':
-    main(output_dir_online=Path('/home/alex/spectra/EDR5/orders'))
+    main(output_dir_online=Path('/home/Alex/spectra/EDR5/orders'))
