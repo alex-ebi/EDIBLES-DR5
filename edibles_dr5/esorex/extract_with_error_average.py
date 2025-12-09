@@ -193,12 +193,12 @@ def modify_sof(sof_file: Path, wm_file: Path, xfb_file: Path, mjd_obs, breakpoin
 # Dictionary of Merge_delt for order merging, dependent on setting wavelength. Units are in Angstrom.
 merge_delt_dict = {346: [10, 10], 437: [13, 7], 564: [19, 4], 860: [20, 1]}
 
-def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints.csv'):
+def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'supporting_data/breakpoints.csv', rps=None):
     obs_list_path = files('edibles_dr5') / 'supporting_data/obs_names.csv'
     obs_list = pd.read_csv(obs_list_path, index_col=0)
     # obs_list = obs_list.loc[(obs_list['MJD-OBS'] > 57352) & (obs_list['MJD-OBS'] < 57777)]
     # obs_list = obs_list.iloc[6:7]
-    edps_object_dir = Path('/run/media/Alex/PortableSSD/EDPS_data/UVES/object')
+    edps_object_dir = Path('/run/media/Alex/CrucialX10/EDPS_data/UVES/object')
     output_dir = Path('/home/Alex/spectra/EDR5/orders')
     cleanup = True
     breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:, 'MJD'].values
@@ -260,6 +260,9 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
             
             crop_limits = merge_delt_dict[wave_setting]
 
+            if rps is None:
+                rps = ''
+    
             # Run esorex on input_edibles.sof
             # flatfield pixel per pixel
             os.system(f'/usr/bin/nice {paths.esorex_path} '
@@ -271,6 +274,8 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                     '--reduce.extract.method="average" '
                     # '--reduce.backsub.mmethod="min" '
                     # '--reduce.skysub="false" '
+                    '--reduce.backsub.radiusy=5 '
+                    f'{rps}'
                     f'{sub_dir / "input_edibles.sof"}')
 
             # Extract reductions which were made with super flats
