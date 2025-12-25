@@ -89,5 +89,7 @@ edibles_dr5/paths.py
 paths.py
 
 edibles_dr5/tmp/*
+!edibles_dr5/tmp/molecfit_calc/exclude_pix.dat
+!edibles_dr5/tmp/molecfit_calc/exclude_wl.dat
 
 .~lock*
