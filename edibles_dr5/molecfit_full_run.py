@@ -14,8 +14,8 @@ def main():
     obs_list = pd.read_csv(files('edibles_dr5') / 'supporting_data/obs_names.csv')
 
     molecfit_par_path = files('edibles_dr5') / 'molecfit/EDR5_loop.par'
-    mol_bands_path = files('edibles_dr5') / 'molecfit/molecular_bands.xlsx'
-    mol_bands = pd.read_excel(mol_bands_path)
+    mol_bands_path = files('edibles_dr5') / 'molecfit/molecular_bands.csv'
+    mol_bands = pd.read_csv(mol_bands_path)
     print(mol_bands)
 
     include_path = files('edibles_dr5') / 'molecfit/include.dat'
@@ -27,11 +27,7 @@ def main():
     molecfit_dir.mkdir(exist_ok=True, parents=True)
     os.chdir(molecfit_dir)
 
-    # Filter file list for settings
-    file_list = spec_dir.rglob('*.fits')
-
     # iterate through inclusion regions
-
     settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
     orders = list(range(1, 40))
 
@@ -39,9 +35,11 @@ def main():
 
     spec_list = list(spec_dir.rglob('*.fits'))
 
+    spec_list = [item for item in spec_list if item.match('*HD183143*')]
+
     for setting in settings:
         for order in orders:
-            skip_iter = False
+            # skip_iter = False
             # Filter file list for settings
             file_list = [item for item in spec_list if item.match(f'*{setting}_O{order}.fits')]
             if len(file_list) == 0:
@@ -54,7 +52,7 @@ def main():
                 include_order = []
                 for ir in include_list:
                     if min(spec[0]) < ir[0] < max(spec[0]) and min(spec[0]) < ir[1] < max(spec[0]):
-                        print(ir)
+                        # print(ir)
                         include_order.append(ir)
                 
                 if len(include_order) == 0:
@@ -67,7 +65,7 @@ def main():
                 fit_molec_order = []
                 rel_col_order = []
                 for _, row in mol_bands.iterrows():
-                    print(row)
+                    # print(row)
                     if row['x_min'] < min(spec[0]) < row['x_max'] or row['x_min'] < max(spec[0]) < row['x_max']:
                         molec_order.append(row['species'])
                         fit_molec_order.append(row['fit_molec'])
@@ -75,7 +73,7 @@ def main():
 
                 if len(molec_order) == 0:
                     missed_settings.append([setting, order, min(spec[0]), max(spec[0])])
-                    pd.DataFrame(missed_settings).to_excel(files('edibles_dr5') / 'molecfit/missed_settings.xlsx')
+                    pd.DataFrame(missed_settings).to_excel(files('edibles_dr5') / 'tmp/molecfit_calc/missed_settings.xlsx')
                     break
 
 
@@ -103,6 +101,7 @@ def main():
                 # save the modified atlas command file
                 with open(molecfit_par_path, 'w') as f:
                     f.writelines(lines)
+
 
                 # Do telluric correction
                 os.system(paths.molecfit_bin / f'molecfit {molecfit_par_path}')
