@@ -199,8 +199,8 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
     # obs_list = obs_list.loc[(obs_list['MJD-OBS'] > 57352) & (obs_list['MJD-OBS'] < 57777)]
     # obs_list = obs_list.iloc[6:7]
     edps_object_dir = Path('/run/media/Alex/CrucialX10/EDPS_data/UVES/object')
-    output_dir = Path('/home/Alex/spectra/EDR5/orders')
-    cleanup = True
+    output_dir = Path('/home/Alex/spectra/EDR5/orders_uwo')
+    cleanup = False
     breakpoints = pd.read_csv(breakpoint_file, index_col=0).loc[:, 'MJD'].values
 
     # Make / update database of objects in EDPS directory with OBJECT names and TPL START
@@ -274,7 +274,7 @@ def main(output_dir_online=None, breakpoint_file = files('edibles_dr5') / 'suppo
                     '--reduce.extract.method="average" '
                     # '--reduce.backsub.mmethod="min" '
                     # '--reduce.skysub="false" '
-                    '--reduce.backsub.radiusy=5 '
+                    # '--reduce.backsub.radiusy=5 '
                     f'{rps}'
                     f'{sub_dir / "input_edibles.sof"}')
 
