@@ -28,7 +28,8 @@ def main():
     os.chdir(molecfit_dir)
 
     # iterate through inclusion regions
-    settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
+    # settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
+    settings = ['860nm_redl', '860nm_redu']
     orders = list(range(1, 40))
 
     missed_settings = []
