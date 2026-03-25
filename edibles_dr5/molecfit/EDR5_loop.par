@@ -7,7 +7,7 @@ user_workdir: /home/Alex/Repositories/EDIBLES-DR5/edibles_dr5/tmp/molecfit_calc
 ## INPUT DATA
 
 # Data file name (path relative to the current directory or absolute path)
-filename: /home/Alex/spectra/EDR5/orders/HD183143_2018-09-12T02:52:58_860nm_redl_O3.fits
+filename: /home/Alex/spectra/EDR5/orders/HD170740_2016-05-05T04:51:20_564nm_redu_O2.fits
 
 # ASCII list of files to be corrected for telluric absorption using the
 # transmission curve derived from the input reference file (path of list and
@@ -79,10 +79,10 @@ xtol: 1e-06
 
 # List of molecules to be included in the model
 # (default: 'H2O', N_val: nmolec)
-list_molec: O3 O2 H2O
+list_molec: NO2 H2O O3
 
 # Fit flags for molecules -- 1 = yes; 0 = no (N_val: nmolec)
-fit_molec: 0 0 1
+fit_molec: 0 0 0
 
 # Values of molecular columns, expressed relatively to the input ATM profile
 # columns (N_val: nmolec) [1 = 100%]

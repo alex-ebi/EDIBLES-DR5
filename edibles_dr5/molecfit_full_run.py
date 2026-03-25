@@ -29,21 +29,24 @@ def main():
 
     # iterate through inclusion regions
     # settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
-    settings = ['860nm_redl', '860nm_redu']
-    orders = list(range(1, 40))
+    # orders = list(range(1, 40))
+    settings = ['564nm_redu']
+    orders = [2]
 
     missed_settings = []
 
     spec_list = list(spec_dir.rglob('*.fits'))
 
-    spec_list = [item for item in spec_list if item.match('*HD183143*')]
+    # spec_list = [item for item in spec_list if item.match('*HD183143*')]
 
     for setting in settings:
         for order in orders:
             # skip_iter = False
             # Filter file list for settings
             file_list = [item for item in spec_list if item.match(f'*{setting}_O{order}.fits')]
+            # print(file_list)
             if len(file_list) == 0:
+                # print('nothing')
                 continue
 
             for spec_path in file_list:
@@ -53,7 +56,7 @@ def main():
                 include_order = []
                 for ir in include_list:
                     if min(spec[0]) < ir[0] < max(spec[0]) and min(spec[0]) < ir[1] < max(spec[0]):
-                        # print(ir)
+                        print(ir)
                         include_order.append(ir)
                 
                 if len(include_order) == 0:
