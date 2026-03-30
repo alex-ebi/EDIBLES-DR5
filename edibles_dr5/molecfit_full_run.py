@@ -28,10 +28,10 @@ def main():
     os.chdir(molecfit_dir)
 
     # iterate through inclusion regions
-    # settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
-    # orders = list(range(1, 40))
-    settings = ['564nm_redu']
-    orders = [2]
+    settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
+    orders = list(range(1, 40))
+    # settings = ['564nm_redu']
+    # orders = [2]
 
     missed_settings = []
 
@@ -48,7 +48,8 @@ def main():
             if len(file_list) == 0:
                 # print('nothing')
                 continue
-
+            
+            const_fit = False
             for spec_path in file_list:
                 spec = read_spec(spec_path)
                 spec[0] = transformations.angstrom_air_to_vac(spec[0]) / 10000
@@ -59,8 +60,9 @@ def main():
                         print(ir)
                         include_order.append(ir)
                 
-                if len(include_order) == 0:
-                    break
+                if len(include_order) < 3:
+                    const_fit = True
+                    # break
 
                 # Save inclusion ranges to file
                 np.savetxt(molecfit_dir / 'include.dat', include_order, fmt='%.8f')
@@ -80,6 +82,19 @@ def main():
                     pd.DataFrame(missed_settings).to_excel(files('edibles_dr5') / 'tmp/molecfit_calc/missed_settings.xlsx')
                     break
 
+                if const_fit:
+                    rpar_name = files("edibles_dr5") / "molecfit/rpar" / spec_path.name.replace(".fits", ".rpar")
+                    rpar_neighbour = Path(str(rpar_name).replace(f'O{order}', f'O{order+2}'))
+                    if not rpar_neighbour.exists():
+                        rpar_neighbour = Path(str(rpar_name).replace(f'O{order}', f'O{order-2}'))
+                        if not rpar_neighbour.exists():
+                            break
+
+                    with rpar_neighbour.open() as f:
+                        n_lines = f.readlines()
+                        # get column densities from neighbouring rpar
+                        molec_list = n_lines[81]
+
 
                 # load the molecfit parameter file
                 with molecfit_par_path.open() as f:
@@ -88,18 +103,31 @@ def main():
                 # modify lines
                 lines[4] = f'user_workdir: {molecfit_dir}\n'
                 lines[9] = f'filename: {spec_path}\n'
-                lines[81] = 'list_molec: ' + ' '.join(molec_order) + '\n'
+                if const_fit:
+                    lines[81] = molec_list
+                else:
+                    lines[81] = 'list_molec: ' + ' '.join(molec_order) + '\n'
 
-                fit_bools = [f'{item:.0f}' for item in fit_molec_order]            
+                if const_fit:
+                    fit_bools = ['0' for _ in fit_molec_order]    
+                else:
+                    fit_bools = [f'{item:.0f}' for item in fit_molec_order]            
+                   
                 lines[84] = 'fit_molec: ' + ' '.join(fit_bools) + '\n'
 
                 rel_col_strings = [f'{item:.2f}' for item in rel_col_order]            
                 lines[88] = 'relcol: ' + ' '.join(rel_col_strings) + '\n'
 
+                wlc_n = np.min([len(include_order) - 1, 2])
+                lines[150] = f'wlc_n: {wlc_n}' + '\n'
+
                 if setting in ['564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']:
                     lines[245] = f'slitw_key: ESO INS SLIT3 WID\n'
                 elif setting in ['346nm_blue', '437nm_blue']:
                     lines[245] = f'slitw_key: ESO INS SLIT2 WID\n'
+
+                if const_fit:
+                    lines[136] = 'fit_wlc: 0\n'
 
 
                 # save the modified atlas command file
@@ -113,6 +141,9 @@ def main():
 
                 # rewrite header and save corrected spectrum to tell_corr directory
                 molecfit_tac_header.main(setting, molecfit_dir / 'output', spec_name=spec_path.name)
+
+                # copy rpar file
+                os.system(f'cp {molecfit_dir / "output/molecfit_expert_fit.rpar"} {files("edibles_dr5") / "molecfit/rpar" / spec_path.name.replace(".fits", ".rpar")}')
 
 
 if __name__ == '__main__':
