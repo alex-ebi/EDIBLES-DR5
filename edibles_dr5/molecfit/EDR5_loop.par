@@ -7,7 +7,7 @@ user_workdir: /home/Alex/Repositories/EDIBLES-DR5/edibles_dr5/tmp/molecfit_calc
 ## INPUT DATA
 
 # Data file name (path relative to the current directory or absolute path)
-filename: /home/Alex/spectra/EDR5/orders/HD37022_2016-02-22T03:26:02_564nm_redl_O12.fits
+filename: /home/Alex/spectra/EDR5/orders/HD99953_2017-04-29T01:42:57_860nm_redl_O5.fits
 
 # ASCII list of files to be corrected for telluric absorption using the
 # transmission curve derived from the input reference file (path of list and
@@ -79,10 +79,10 @@ xtol: 1e-06
 
 # List of molecules to be included in the model
 # (default: 'H2O', N_val: nmolec)
-list_molec: NO2 H2O O3
+list_molec: O3 O2 H2O
 
 # Fit flags for molecules -- 1 = yes; 0 = no (N_val: nmolec)
-fit_molec: 0 1 0
+fit_molec: 0 0 1
 
 # Values of molecular columns, expressed relatively to the input ATM profile
 # columns (N_val: nmolec) [1 = 100%]
@@ -134,7 +134,7 @@ fit_range2: 1
 ## WAVELENGTH SOLUTION
 
 # Refinement of wavelength solution using a polynomial of degree wlc_n
-fit_wlc: 1
+fit_wlc: 0
 
 # Polynomial degree of the refined wavelength solution
 wlc_n: 1
@@ -173,7 +173,7 @@ kernmode: 1
 fit_res_gauss: 1
 
 # Initial value for FWHM of Gaussian in pixels
-res_gauss: 1.71819
+res_gauss: 1.45772
 
 # Fit resolution by Lorentzian -- 1 = yes; 0 = no
 fit_res_lorentz: 0

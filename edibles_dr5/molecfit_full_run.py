@@ -28,10 +28,10 @@ def main():
     os.chdir(molecfit_dir)
 
     # iterate through inclusion regions
-    settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
+    # settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
     orders = list(range(1, 40))
-    # settings = ['564nm_redu']
-    # orders = [2]
+    settings = ['860nm_redl', '860nm_redu']
+    # orders = [3]
 
     missed_settings = []
 
@@ -60,7 +60,7 @@ def main():
                         print(ir)
                         include_order.append(ir)
                 
-                if len(include_order) < 3:
+                if len(include_order) == 0:
                     const_fit = True
                     # break
 
@@ -76,24 +76,27 @@ def main():
                         molec_order.append(row['species'])
                         fit_molec_order.append(row['fit_molec'])
                         rel_col_order.append(row['rel_col'])
-
+                
                 if len(molec_order) == 0:
                     missed_settings.append([setting, order, min(spec[0]), max(spec[0])])
-                    pd.DataFrame(missed_settings).to_excel(files('edibles_dr5') / 'tmp/molecfit_calc/missed_settings.xlsx')
+                    pd.DataFrame(missed_settings).to_csv(files('edibles_dr5') / 'tmp/molecfit_calc/missed_settings.csv')
                     break
 
                 if const_fit:
                     rpar_name = files("edibles_dr5") / "molecfit/rpar" / spec_path.name.replace(".fits", ".rpar")
-                    rpar_neighbour = Path(str(rpar_name).replace(f'O{order}', f'O{order+2}'))
+                    rpar_neighbour = Path(str(rpar_name).replace(f'O{order}', f'O{order+1}'))
                     if not rpar_neighbour.exists():
-                        rpar_neighbour = Path(str(rpar_name).replace(f'O{order}', f'O{order-2}'))
+                        rpar_neighbour = Path(str(rpar_name).replace(f'O{order}', f'O{order-1}'))
                         if not rpar_neighbour.exists():
                             break
 
                     with rpar_neighbour.open() as f:
                         n_lines = f.readlines()
                         # get column densities from neighbouring rpar
-                        molec_list = n_lines[81]
+                        list_molec = n_lines[81]
+                        fit_molec = n_lines[84]
+                        relcol = n_lines[88]
+                        # res_gauss = n_lines[174]
 
 
                 # load the molecfit parameter file
@@ -103,20 +106,24 @@ def main():
                 # modify lines
                 lines[4] = f'user_workdir: {molecfit_dir}\n'
                 lines[9] = f'filename: {spec_path}\n'
-                if const_fit:
-                    lines[81] = molec_list
-                else:
-                    lines[81] = 'list_molec: ' + ' '.join(molec_order) + '\n'
+
 
                 if const_fit:
                     fit_bools = ['0' for _ in fit_molec_order]    
                 else:
                     fit_bools = [f'{item:.0f}' for item in fit_molec_order]            
                    
-                lines[84] = 'fit_molec: ' + ' '.join(fit_bools) + '\n'
 
-                rel_col_strings = [f'{item:.2f}' for item in rel_col_order]            
-                lines[88] = 'relcol: ' + ' '.join(rel_col_strings) + '\n'
+                rel_col_strings = [f'{item:.2f}' for item in rel_col_order] 
+
+                if const_fit:         
+                    lines[81] = list_molec
+                    lines[84] = fit_molec
+                    lines[88] = relcol  
+                else:
+                    lines[81] = 'list_molec: ' + ' '.join(molec_order) + '\n'
+                    lines[84] = 'fit_molec: ' + ' '.join(fit_bools) + '\n'
+                    lines[88] = 'relcol: ' + ' '.join(rel_col_strings) + '\n'
 
                 wlc_n = np.min([len(include_order) - 1, 2])
                 lines[150] = f'wlc_n: {wlc_n}' + '\n'
@@ -128,6 +135,8 @@ def main():
 
                 if const_fit:
                     lines[136] = 'fit_wlc: 0\n'
+                    # lines[174] = res_gauss
+                    lines[175] = 'res_gauss: 1.45772\n'
 
 
                 # save the modified atlas command file
