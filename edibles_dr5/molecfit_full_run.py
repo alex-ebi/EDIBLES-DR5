@@ -30,8 +30,8 @@ def main():
     # iterate through inclusion regions
     # settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
     orders = list(range(1, 40))
-    settings = ['860nm_redl', '860nm_redu']
-    # orders = [3]
+    settings = ['860nm_redu']
+    orders = [8]
 
     missed_settings = []
 
