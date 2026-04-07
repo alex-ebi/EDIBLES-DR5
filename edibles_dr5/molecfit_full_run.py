@@ -9,6 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from importlib.resources import files
 
+incl_stars = None
+incl_stars = ['HD186841', 'HD183143', 'HD185859', 'HD63804']
 
 def main():
     obs_list = pd.read_csv(files('edibles_dr5') / 'supporting_data/obs_names.csv')
@@ -16,11 +18,11 @@ def main():
     molecfit_par_path = files('edibles_dr5') / 'molecfit/EDR5_loop.par'
     mol_bands_path = files('edibles_dr5') / 'molecfit/molecular_bands.csv'
     mol_bands = pd.read_csv(mol_bands_path)
-    print(mol_bands)
+    # print(mol_bands)
 
     include_path = files('edibles_dr5') / 'molecfit/include.dat'
     include_list = np.genfromtxt(include_path)
-    print(include_list)
+    # print(include_list)
 
     spec_dir = paths.edr5_orders_dir
     molecfit_dir = files('edibles_dr5') / 'tmp/molecfit_calc'
@@ -35,9 +37,18 @@ def main():
 
     missed_settings = []
 
-    spec_list = list(spec_dir.rglob('*.fits'))
+    spec_list_in = list(spec_dir.rglob('*.fits'))
+
+    if incl_stars is None:
+        spec_list = spec_list_in
+    else:
+        spec_list = []
+        for star_name in incl_stars:
+            sub_list = [item for item in spec_list_in if item.match(f'*{star_name}*')]
+            spec_list += sub_list
 
     # spec_list = [item for item in spec_list if item.match('*HD183143*')]
+    print(spec_list)
 
     for setting in settings:
         for order in orders:
@@ -126,7 +137,7 @@ def main():
                     lines[88] = 'relcol: ' + ' '.join(rel_col_strings) + '\n'
 
                 wlc_n = np.min([len(include_order) - 1, 2])
-                lines[150] = f'wlc_n: {wlc_n}' + '\n'
+                lines[139] = f'wlc_n: {wlc_n}' + '\n'
 
                 if setting in ['564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']:
                     lines[245] = f'slitw_key: ESO INS SLIT3 WID\n'
