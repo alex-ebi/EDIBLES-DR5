@@ -48,7 +48,7 @@ def main():
             spec_list += sub_list
 
     # spec_list = [item for item in spec_list if item.match('*HD183143*')]
-    print(spec_list)
+    # print(spec_list)
 
     for setting in settings:
         for order in orders:

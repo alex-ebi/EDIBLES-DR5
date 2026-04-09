@@ -12,6 +12,10 @@ from importlib.resources import files
 incl_stars = None
 # incl_stars = ['HD186841', 'HD183143', 'HD185859', 'HD63804']
 
+def overlap(start1, end1, start2, end2):
+    """Does the range (start1, end1) overlap with (start2, end2)?"""
+    return not (end1 < start2 or end2 < start1)
+
 def main():
     obs_list = pd.read_csv(files('edibles_dr5') / 'supporting_data/obs_names.csv')
 
@@ -32,9 +36,7 @@ def main():
 
     # iterate through inclusion regions
     settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
-    orders = list(range(1, 40))
-    # settings = ['860nm_redu']
-    # orders = [8]
+    settings = ['564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
 
     missed_settings = []
 
@@ -56,7 +58,7 @@ def main():
         # skip_iter = False
         # Filter file list for settings
         file_list = [item for item in spec_list if item.match(f'*{setting}.fits')]
-        # print(file_list)
+        print(file_list)
         if len(file_list) == 0:
             # print('nothing')
             continue
@@ -66,9 +68,11 @@ def main():
             spec = read_spec(spec_path)
             spec[0] = transformations.angstrom_air_to_vac(spec[0]) / 10000
 
+            plt.plot(spec[0], spec[1])
+            plt.show()
             include_order = []
             for ir in include_list:
-                if min(spec[0]) < ir[0] < max(spec[0]) and min(spec[0]) < ir[1] < max(spec[0]):
+                if np.nanmin(spec[0]) < ir[0] < np.nanmax(spec[0]) and np.nanmin(spec[0]) < ir[1] < np.nanmax(spec[0]):
                     print(ir)
                     include_order.append(ir)
             
@@ -80,10 +84,15 @@ def main():
             rel_col_order = []
             for _, row in mol_bands.iterrows():
                 # print(row)
-                if row['x_min'] < min(spec[0]) < row['x_max'] or row['x_min'] < max(spec[0]) < row['x_max']:
+                if overlap(row['x_min'], row['x_max'], np.nanmin(spec), np.nanmax(spec)) and not row['species'] in molec_order:
                     molec_order.append(row['species'])
                     fit_molec_order.append(row['fit_molec'])
                     rel_col_order.append(row['rel_col'])
+
+            print(include_order)
+            print(molec_order)
+            plt.plot(spec[0], spec[1])
+            plt.show()
             
             if len(molec_order) == 0:
                 missed_settings.append([setting, min(spec[0]), max(spec[0])])

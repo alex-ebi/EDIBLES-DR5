@@ -7,7 +7,7 @@ user_workdir: /home/Alex/Repositories/EDIBLES-DR5/edibles_dr5/tmp/molecfit_calc
 ## INPUT DATA
 
 # Data file name (path relative to the current directory or absolute path)
-filename: /home/Alex/spectra/EDR5/orders/HD63804_2019-02-03T08:05:38_860nm_redu_O8.fits
+filename: /home/Alex/spectra/EDR5/orders/HD63804_2019-02-03T06:54:45_860nm_redl_O6.fits
 
 # ASCII list of files to be corrected for telluric absorption using the
 # transmission curve derived from the input reference file (path of list and
@@ -86,7 +86,7 @@ fit_molec: 1
 
 # Values of molecular columns, expressed relatively to the input ATM profile
 # columns (N_val: nmolec) [1 = 100%]
-relcol: 1.37163
+relcol: 1.46855
 
 ## BACKGROUND AND CONTINUUM
 
@@ -172,13 +172,13 @@ kernmode: 1
 fit_res_gauss: 1
 
 # Initial value for FWHM of Gaussian in pixels
-res_gauss: 2.51653
+res_gauss: 2.33393
 
 # Fit resolution by Lorentzian -- 1 = yes; 0 = no
 fit_res_lorentz: 1
 
 # Initial value for FWHM of Lorentzian in pixels
-res_lorentz: 0.580042
+res_lorentz: 0
 
 # Size of Gaussian/Lorentzian/Voigtian kernel in FWHM
 kernfac: 300
@@ -203,27 +203,27 @@ obsdate: 2019.09
 obsdate_key: MJD-OBS
 
 # UTC in s
-utc: 29914
+utc: 24964
 utc_key: UTC
 
 # Telescope altitude angle in deg
-telalt: 29.335
+telalt: 46.451
 telalt_key: ESO TEL ALT
 
 # Humidity in %
-rhum: 43.5
+rhum: 46
 rhum_key: ESO TEL AMBI RHUM
 
 # Pressure in hPa
-pres: 743.68
+pres: 744.05
 pres_key: ESO TEL AMBI PRES START
 
 # Ambient temperature in deg C
-temp: 15.52
+temp: 14.59
 temp_key: ESO TEL AMBI TEMP
 
 # Mirror temperature in deg C
-m1temp: 13.47
+m1temp: 12.96
 m1temp_key: ESO TEL TH M1 TEMP
 
 # Elevation above sea level in m (default is Paranal: 2635m)
@@ -257,7 +257,7 @@ ref_atm: equ.atm
 # relative to the installation directory or absolute path). In the case of "none", no GDAS
 # profiles will be considered. The default "auto" performs an automatic
 # retrieval.
-gdas_dir: /tmp/molecfit_tmp_8XGudg/data/profiles/grib
+gdas_dir: /tmp/molecfit_tmp_o0EiQE/data/profiles/grib
 gdas_prof: auto
 
 # Grid of layer heights for merging ref_atm and GDAS profile. Fixed grid = 1
