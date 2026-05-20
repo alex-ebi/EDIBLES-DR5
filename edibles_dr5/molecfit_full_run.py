@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from importlib.resources import files
 
 incl_stars = None
-incl_stars = ['HD186841', 'HD183143', 'HD185859', 'HD63804']
+# incl_stars = ['HD186841', 'HD183143', 'HD185859', 'HD63804']
 
 def main():
     obs_list = pd.read_csv(files('edibles_dr5') / 'supporting_data/obs_names.csv')
@@ -32,8 +32,8 @@ def main():
     # iterate through inclusion regions
     settings = ['346nm_blue', '437nm_blue', '564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']
     orders = list(range(1, 40))
-    # settings = ['860nm_redu']
-    # orders = [8]
+    settings = ['860nm_redl']
+    orders = [12]
 
     missed_settings = []
 
