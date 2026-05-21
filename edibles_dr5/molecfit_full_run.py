@@ -136,7 +136,7 @@ def main():
                     lines[84] = 'fit_molec: ' + ' '.join(fit_bools) + '\n'
                     lines[88] = 'relcol: ' + ' '.join(rel_col_strings) + '\n'
 
-                wlc_n = np.max([np.min([len(include_order) - 1, 2]), 0])
+                wlc_n = np.max([np.min([len(include_order) - 1, 4]), 0])
                 lines[139] = f'wlc_n: {wlc_n}' + '\n'
 
                 if setting in ['564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']:

@@ -137,7 +137,7 @@ fit_range2: 1
 fit_wlc: 0
 
 # Polynomial degree of the refined wavelength solution
-wlc_n: 2
+wlc_n: 3
 
 # Initial constant term for wavelength correction (shift relative to half
 # wavelength range)
