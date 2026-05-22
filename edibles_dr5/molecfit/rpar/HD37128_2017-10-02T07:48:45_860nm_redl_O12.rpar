@@ -137,7 +137,7 @@ fit_range2: 1
 fit_wlc: 0
 
 # Polynomial degree of the refined wavelength solution
-wlc_n: 2
+wlc_n: 3
 
 # Initial constant term for wavelength correction (shift relative to half
 # wavelength range)
@@ -257,7 +257,7 @@ ref_atm: equ.atm
 # relative to the installation directory or absolute path). In the case of "none", no GDAS
 # profiles will be considered. The default "auto" performs an automatic
 # retrieval.
-gdas_dir: /tmp/molecfit_tmp_QrBVVP/data/profiles/grib
+gdas_dir: /tmp/molecfit_tmp_c3G43W/data/profiles/grib
 gdas_prof: auto
 
 # Grid of layer heights for merging ref_atm and GDAS profile. Fixed grid = 1
