@@ -34,6 +34,8 @@ def main():
     orders = list(range(1, 40))
     settings = ['860nm_redl']
     orders = [12]
+    settings = ['564nm_redl']
+    orders = [11]
 
     missed_settings = []
 

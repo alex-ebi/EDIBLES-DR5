@@ -7,7 +7,7 @@ user_workdir: /home/Alex/Repositories/EDIBLES-DR5/edibles_dr5/tmp/molecfit_calc
 ## INPUT DATA
 
 # Data file name (path relative to the current directory or absolute path)
-filename: /home/Alex/spectra/EDR5/orders/HD185859_2015-09-20T01:47:16_564nm_redl_O11.fits
+filename: /home/Alex/spectra/EDR5/orders_raw/HD185859_2015-09-20T01:47:16_564nm_redl_O11.fits
 
 # ASCII list of files to be corrected for telluric absorption using the
 # transmission curve derived from the input reference file (path of list and
@@ -257,7 +257,7 @@ ref_atm: equ.atm
 # relative to the installation directory or absolute path). In the case of "none", no GDAS
 # profiles will be considered. The default "auto" performs an automatic
 # retrieval.
-gdas_dir: /tmp/molecfit_tmp_4hSnYx/data/profiles/grib
+gdas_dir: /tmp/molecfit_tmp_CzNo9m/data/profiles/grib
 gdas_prof: auto
 
 # Grid of layer heights for merging ref_atm and GDAS profile. Fixed grid = 1
