@@ -1,5 +1,6 @@
 from edibles_dr5 import paths
 import os
+import subprocess
 from edibles_dr5 import molecfit_tac_header
 from edibles_dr5.io import read_spec
 from edibles_dr5 import transformations
@@ -34,7 +35,7 @@ def main():
     orders = list(range(1, 40))
     settings = ['860nm_redl']
     orders = [12]
-    settings = ['564nm_redl']
+    settings = ['564nm_redu']
     orders = [11]
 
     missed_settings = []
@@ -70,6 +71,7 @@ def main():
                 include_order = []
                 for ir in include_list:
                     if min(spec[0]) < ir[0] < max(spec[0]) and min(spec[0]) < ir[1] < max(spec[0]):
+                        print(min(spec[0]), max(spec[0]))
                         print(ir)
                         include_order.append(ir)
                 
@@ -139,6 +141,8 @@ def main():
                     lines[88] = 'relcol: ' + ' '.join(rel_col_strings) + '\n'
 
                 wlc_n = np.max([np.min([len(include_order) - 1, 4]), 0])
+                print(include_order)
+                print(f'wlc_n: {wlc_n}')
                 lines[139] = f'wlc_n: {wlc_n}' + '\n'
 
                 if setting in ['564nm_redl', '564nm_redu', '860nm_redl', '860nm_redu']:
@@ -158,14 +162,14 @@ def main():
 
 
                 # Do telluric correction
-                os.system(paths.molecfit_bin / f'molecfit {molecfit_par_path}')
-                os.system(paths.molecfit_bin / f'calctrans {molecfit_par_path}')
+                subprocess.check_call([paths.molecfit_bin / 'molecfit', molecfit_par_path])
+                subprocess.check_call([paths.molecfit_bin / 'calctrans', molecfit_par_path])
 
                 # rewrite header and save corrected spectrum to tell_corr directory
                 molecfit_tac_header.main(setting, molecfit_dir / 'output', spec_name=spec_path.name)
 
                 # copy rpar file
-                os.system(f'cp {molecfit_dir / "output/molecfit_expert_fit.rpar"} {files("edibles_dr5") / "molecfit/rpar" / spec_path.name.replace(".fits", ".rpar")}')
+                subprocess.check_call(['cp', str(molecfit_dir / "output/molecfit_expert_fit.rpar"), str(files("edibles_dr5") / "molecfit/rpar" / spec_path.name.replace(".fits", ".rpar"))])
 
 
 if __name__ == '__main__':
